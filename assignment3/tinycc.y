@@ -31,6 +31,7 @@ function_definition:
 parameter_type_list:
 	parameter_declaration		{}
 	| parameter_type_list ',' parameter_declaration		{}
+	|		{}
 	;
 parameter_declaration:
 	T_Int declarator 		{}
@@ -49,10 +50,12 @@ compound_statement:
 	;
 declaration_list:
 	declaration 	{}
+	|		{}
 	;
 statement_list:
 	statement 	{}
 	| statement_list statement 		{}
+	|		{}
 	;
 expression:
 	assign_expr 	{}
@@ -108,6 +111,7 @@ primary_expr:
 argument_expression_list:
 	assign_expr 		{}
 	| argument_expression_list ',' assign_expr 		{}
+	|		{}
 	;
 constant:
 	Integer 	{}

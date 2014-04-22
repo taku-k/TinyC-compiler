@@ -26,7 +26,7 @@ keyword	"int"|"if"|"while"|"return"|"else"
 	return Integer;
 }
 {symbol} {
-	return yytext[0];
+	return *yytext;
 }
 .	{
 	yyerror("Error: invalid character");

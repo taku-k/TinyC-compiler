@@ -828,7 +828,7 @@ case 9:
 YY_RULE_SETUP
 #line 28 "calc.l"
 {
-	return yytext[0];
+	return *yytext;
 }
 	YY_BREAK
 case 10:
