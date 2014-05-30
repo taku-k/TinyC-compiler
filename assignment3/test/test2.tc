@@ -1,1 +1,6 @@
-int f(int a){;}
+int f(int a){
+	if (a >>= 20) {
+		return 1;
+	}
+	return 0;
+}
