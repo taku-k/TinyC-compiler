@@ -5,9 +5,9 @@
 
 TC::TC_Driver::~TC_Driver(){
 	delete(scanner);
-	scanner = nullptr;
+	scanner = NULL;
 	delete(parser);
-	parser = nullptr;
+	parser = NULL;
 }
 
 void TC::TC_Driver::parse() {
@@ -15,7 +15,7 @@ void TC::TC_Driver::parse() {
 	try {
 		scanner = new TC::TC_Scanner(&std::cin);
 	} catch (std::bad_alloc &ba) {
-		std::cerr << "Faild" << std::endl;
+		std::cerr << "Faild: scanner" << std::endl;
 		exit(EXIT_FAILURE);
 	}
 
@@ -23,7 +23,7 @@ void TC::TC_Driver::parse() {
 	try {
 		parser = new TC::TC_Parser( *scanner, *this);
 	} catch (std::bad_alloc &ba) {
-		std::cerr << "Faild" << std::endl;
+		std::cerr << "Faild: parser" << std::endl;
 		exit(EXIT_FAILURE);
 	}
 

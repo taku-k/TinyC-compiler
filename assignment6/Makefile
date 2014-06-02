@@ -1,10 +1,10 @@
-CXX   ?= clang++
+CXX   ?= gcc
 
 EXE = tcc
 
 CXXDEBUG = -g -Wall
 
-CXXSTD = -std=c++11
+CXXSTD = -std=c++11 -lstdc++
 
 CXXFLAGS = -Wno-deprecated-register -O0  $(CXXDEBUG) $(CXXSTD)
 
