@@ -19,9 +19,14 @@
 	#include <cstdlib>
 	#include <iostream>
 	#include "tc_driver.hpp"
+	#include "node.hpp"
 
 #undef yylex
 #define yylex scanner.yylex
+
+}
+
+%union{
 
 }
 

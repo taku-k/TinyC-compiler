@@ -6,7 +6,7 @@ namespace TC{
 
 class TC_Driver {
 public:
-	TC_Driver() : parser(nullptr),scanner(nullptr){};
+	TC_Driver() : parser(NULL),scanner(NULL){};
 	virtual ~TC_Driver();
 
 	void parse();

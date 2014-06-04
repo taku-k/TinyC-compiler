@@ -9,7 +9,7 @@ CXXSTD = -std=c++11 -lstdc++
 CXXFLAGS = -Wno-deprecated-register -O0  $(CXXDEBUG) $(CXXSTD)
 
 
-CPPOBJ = main tc_driver
+CPPOBJ = main tc_driver node
 SOBJ =  parser scanner
 
 FILES = $(addsuffix .cpp, $(CPPOBJ))
@@ -30,7 +30,6 @@ tcc: $(FILES)
 	$(MAKE) $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $(EXE) $(OBJS) parser.o scanner.o $(LIBS)
 
-
 parser: tc_parser.yy
 	/usr/local/opt/bison/bin/bison -d -v tc_parser.yy
 	$(CXX) $(CXXFLAGS) -c -o parser.o tc_parser.tab.cc
@@ -38,7 +37,6 @@ parser: tc_parser.yy
 scanner: scanner.l
 	flex --outfile=tc_scanner.yy.cc  $<
 	$(CXX)  $(CXXFLAGS) -c tc_scanner.yy.cc -o scanner.o
-
 
 .PHONY: clean
 clean:
