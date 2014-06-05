@@ -8,6 +8,8 @@ TC::TC_Driver::~TC_Driver(){
 	scanner = NULL;
 	delete(parser);
 	parser = NULL;
+	delete(nodel);
+	nodel = NULL;
 }
 
 void TC::TC_Driver::parse() {
@@ -19,9 +21,17 @@ void TC::TC_Driver::parse() {
 		exit(EXIT_FAILURE);
 	}
 
+	delete(nodel);
+	try {
+		nodel = new NodeList();
+	} catch (std::bad_alloc &ba) {
+		std::cerr << "Faild nodelist" << std::endl;
+		exit(EXIT_FAILURE);
+	}
+
 	delete(parser);
 	try {
-		parser = new TC::TC_Parser( *scanner, *this);
+		parser = new TC::TC_Parser( *scanner, *this, *nodel);
 	} catch (std::bad_alloc &ba) {
 		std::cerr << "Faild: parser" << std::endl;
 		exit(EXIT_FAILURE);
@@ -31,4 +41,8 @@ void TC::TC_Driver::parse() {
 	if (parser->parse() != accept) {
 		std::cerr << "Parse failed" << std::endl;
 	}
+}
+
+void TC::TC_Driver::print() {
+	nodel->PrintTree();
 }

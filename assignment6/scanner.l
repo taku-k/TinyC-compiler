@@ -25,9 +25,9 @@ symbol			";"|","|"("|")"|"{"|"}"|">"|"<"|"*"|"="|"+"|"/"|"-"
 
 "int"			{ return token::T_Int; }
 "if"			{ return token::T_If; }
-"else"			{ return token::T_Else; }
-"while"			{ return token::T_While; }
-"return"		{ return token::T_Return; }
+"else"		{ return token::T_Else; }
+"while"		{ return token::T_While; }
+"return"	{ return token::T_Return; }
 
 ">="			{ return token::T_GreaterEqual; }
 "<="			{ return token::T_LessEqual; }
@@ -36,8 +36,8 @@ symbol			";"|","|"("|")"|"{"|"}"|">"|"<"|"*"|"="|"+"|"/"|"-"
 "&&"			{ return token::T_And; }
 "||"			{ return token::T_Or; }
 
-{number}		{ return token::Integer; }
+{number}	{ return token::Integer; }
 {id}			{ return token::Identifier; }
-{symbol}		{ return *YYText(); }
-.				{}
+{symbol}	{ return *YYText(); }
+.				  {}
 %%

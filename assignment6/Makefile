@@ -1,15 +1,15 @@
-CXX   ?= gcc
+CXX  ?= gcc
 
 EXE = tcc
 
 CXXDEBUG = -g -Wall
 
-CXXSTD = -std=c++11 -lstdc++
+CXXSTD = -lstdc++
 
-CXXFLAGS = -Wno-deprecated-register -O0  $(CXXDEBUG) $(CXXSTD)
+CXXFLAGS = $(CXXDEBUG)
 
 
-CPPOBJ = main tc_driver node
+CPPOBJ = main node tc_driver
 SOBJ =  parser scanner
 
 FILES = $(addsuffix .cpp, $(CPPOBJ))
@@ -28,7 +28,7 @@ all: tcc
 tcc: $(FILES)
 	$(MAKE) $(SOBJ)
 	$(MAKE) $(OBJS)
-	$(CXX) $(CXXFLAGS) -o $(EXE) $(OBJS) parser.o scanner.o $(LIBS)
+	$(CXX) $(CXXFLAGS) -o $(EXE) $(OBJS) parser.o scanner.o $(LIBS) $(CXXSTD)
 
 parser: tc_parser.yy
 	/usr/local/opt/bison/bin/bison -d -v tc_parser.yy

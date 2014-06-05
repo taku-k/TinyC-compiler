@@ -9,17 +9,20 @@
 		class TC_Driver;
 		class TC_Scanner;
 	}
+	class NodeList;
+	class Nnode;
 }
 
 %parse-param  { TC_Scanner &scanner }
 %parse-param  { TC_Driver &driver   }
+%parse-param  { NodeList &nl        }
 
 %code{
 	#include <fstream>
 	#include <cstdlib>
 	#include <iostream>
+	#include <string>
 	#include "tc_driver.hpp"
-	#include "node.hpp"
 
 #undef yylex
 #define yylex scanner.yylex
@@ -27,7 +30,8 @@
 }
 
 %union{
-
+	Nnode *node;
+	std::string *id;
 }
 
 %token	T_Int
@@ -35,7 +39,7 @@
 %token	T_Else
 %token	T_While
 %token	T_Return
-%token	Identifier
+%token	<id>	Identifier
 %token	Integer
 %token	T_Equal
 %token	T_Or
@@ -45,25 +49,33 @@
 %token	T_GreaterEqual
 
 
+%type <node> external_declaration
+%type <node> declaration
+%type <node> declaration_list
+%type <node> declarator
+%type <node> declarator_list
+
+
+
 %%
 
 program:
-	external_declaration	{}
-	|	program external_declaration	{}
+	external_declaration	{ nl.add($1); }
+	|	program external_declaration	{ nl.add($2); }
 	;
 external_declaration:
-	declaration 	{}
+	declaration 	{ $$ = $1; }
 	| function_definition		{}
 	;
 declaration:
-	T_Int declarator_list ';'	{}
+	T_Int declarator_list ';'	{ $$ = new DeclIntListNode(OP::INT, $2); }
 	;
 declarator_list:
-	declarator 		{}
-	| declarator ',' declarator_list	{}
+	declarator 		{ $$ = $1; }
+	| declarator ',' declarator_list	{ /*$$ = new DeclIntListNode(OP::INT, $1, $3);*/ }
 	;
 declarator:
-	Identifier	{}
+	Identifier	{ $$ = new DeclIntNode($1); }
 	;
 function_definition:
 	T_Int declarator '(' ')' compound_statement		{}

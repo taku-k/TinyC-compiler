@@ -5,22 +5,36 @@ NodeList::~NodeList(void) {
 	//std::for_each(list.begin(), list.end(), delete_object());
 }
 
-void NodeList::PrintNode(void) {
-
+void NodeList::PrintTree(void) {
+  std::cout << "{" << std::endl;
+  for (int i = 0; i < list.size(); i++) {
+    list[i]->PrintNode();
+  }
+  std::cout << "\n}" << std::endl;
 }
 
 void NodeList::Debug(void) {
+  std::cout << "-----Debug start-----" << std::endl;
   for (int i = 0; i < list.size(); i++) {
     std::cout << "Op: " << list[i]->getop() << std::endl;
     std::cout << "Value: " << list[i]->getvalue() << std::endl;
     std::cout << "Name: " << list[i]->getname() << std::endl;
   }
+  std::cout << "------Debug end------" << std::endl;
 }
 // NodeList end
 
 
 
 // Nnode methods 
+Nnode::Nnode(void) {
+  op_ = 0;
+  name_ = "";
+  value_ = 0;
+  for (int i = 0; i < Nnode::N; i++) {
+    node_[i] = NULL;
+  }
+}
 Nnode::Nnode(int op, std::string str) {
 	op_ = op;
 	name_ = str;
@@ -102,6 +116,7 @@ Nnode* Nnode::MakeNode(int op, std::string str, int val, Nnode *a /* NULL */,
   return NULL;
 }
 
+
 int Nnode::getop(void) {
   return op_;
 }
@@ -121,3 +136,33 @@ Nnode *Nnode::getnode(int num) {
   return NULL;
 }
 // Nnode end
+
+
+/*
+ * FuncNode 
+ * 関数ノード
+ */
+FuncNode::FuncNode(Nnode* ret, Nnode* id, 
+                    Nnode* paramlist, Nnode* stat) {
+  op_ = OP::FUNC;
+  node_[0] = ret;
+  node_[1] = id;
+  node_[2] = paramlist;
+  node_[3] = stat;
+}
+
+void FuncNode::PrintNode(void) {
+  std::cout << "((";
+  node_[0]->PrintNode();
+  std::cout << " ";
+  node_[1]->PrintNode();
+  std::cout << ") (";
+  node_[2]->PrintNode();
+  std::cout << ")\n(\n";
+  node_[3]->PrintNode();
+  std::cout << "))\n";
+}
+/*
+ *  FundNode END
+ */
+
