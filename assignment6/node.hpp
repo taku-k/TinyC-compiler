@@ -1,3 +1,6 @@
+#ifndef __NODE_HPP__
+#define __NODE_HPP__ 1
+
 #include <iostream>
 #include <vector>
 #include <string>
@@ -5,12 +8,14 @@
 #include <algorithm>
 #include <string.h>
 
+#include "tc_driver.hpp"
+
 class NodeList;
 class Nnode;
 
 namespace OP{
   enum {
-    FUNC, INT, ID,
+    FUNC, INT, ID, T_OR, T_AND,
   };
 }
 
@@ -18,7 +23,7 @@ namespace OP{
 // 最も外部のノードを保持しておく
 class NodeList{
 public:
-	NodeList(void) {}
+	NodeList() {}
 	~NodeList(void);
 
 	void add(Nnode *node) {
@@ -67,9 +72,11 @@ public:
 	Nnode *getnode(int num);
 
   virtual void PrintNode(void) {
-    node_[0]->PrintNode();
     if (node_[1] != NULL) {
       node_[1]->PrintNode();
+    }
+    if (node_[0] != NULL) {
+      node_[0]->PrintNode();
     }
   }
   virtual void PrintNode(int) {}
@@ -116,6 +123,7 @@ class DeclList : public Nnode {
 public:
   // node_[0] には　nodeがつまりはIdが入る
   // node_[1] には後ろに続くリストが入る
+  // node_[0] = DeclNode, node_[1] = DeclList
   DeclList(const int op, Nnode* list);
   DeclList(const int op, Nnode* node, Nnode* list);
   DeclList(Nnode* node, Nnode* list);
@@ -126,6 +134,7 @@ private:
 class DeclNode : public Nnode {
 public:
   DeclNode(std::string *id);
+  DeclNode(std::string *id, TC::TC_Driver *d);
   void PrintNode(const int op);
   // ParamDeclNodeとの連携で"int"をどのタイミングで表示する？
   void PrintNode(void);
@@ -151,7 +160,7 @@ private:
 
 class ParamDeclList : public Nnode {
 public:
-  // 一つ目がノード
+  // node_[0] = ParamDeclNode, node_[1] = ParamDeclList
   ParamDeclList(Nnode* node, Nnode* list);
   void PrintNode(void);
 private:
@@ -200,16 +209,16 @@ private:
 };
 
 // expression(bison)
-class ExpressionNode : public Nnode {
+class ExpressionList : public Nnode {
 public:
-  ExpressionNode(Nnode* node);
+  ExpressionList(Nnode* node, Nnode* list);
   void PrintNode(void);
 private:
 };
 
 class IFStatNode : public Nnode {
 public:
-  // node_[0] = 
+  // node_[0] = ExpressionList, node_[1] = StatNode etc
   IFStatNode(Nnode* expr, Nnode* stat);
   IFStatNode(Nnode* expr, Nnode* stat, Nnode* elsestat);
   void PrintNode(void);
@@ -218,6 +227,7 @@ private:
 
 class WHILEStatNode : public Nnode {
 public:
+  // node_[0] = ExpressionList, node_[1] = StatNode etc
   WHILEStatNode(Nnode* expr, Nnode* stat);
   void PrintNode(void);
 private:
@@ -225,7 +235,28 @@ private:
 
 class RETURNStatNode : public Nnode {
 public:
+  // node_[0] = ExpressionList
   RETURNStatNode(Nnode* expr);
   void PrintNode(void);
 private:
 };
+
+
+class AssignExprNode : public Nnode {
+public:
+  // node_[0] = AssignExprNode, node_[1] = ExpressionList
+  AssignExprNode(Nnode *node);
+  AssignExprNode(std::string *id, Nnode* node);
+  void PrintNode(void);
+private:
+};
+
+// このクラスはexprすべてを管理する
+class ExprNode : public Nnode {
+public:
+  ExprNode(int op, Nnode *n1, Nnode *n2);
+  void PrintNode(void);
+private:
+};
+
+#endif

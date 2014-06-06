@@ -1,3 +1,5 @@
+#ifndef __TCSCANNER_HPP__
+#define __TCSCANNER_HPP__ 1
 #if ! defined(yyFlexLexerOnce)
 #include <FlexLexer.h>
 #endif
@@ -24,3 +26,4 @@ private:
 };
 
 }
+#endif

@@ -2,6 +2,7 @@
 	#include <string>
 	#include <iostream>
 	#include "tc_scanner.hpp"
+  #include "node.hpp"
 
 	typedef TC::TC_Parser::token token;
 %}
@@ -32,14 +33,20 @@ symbol			";"|","|"("|")"|"{"|"}"|">"|"<"|"*"|"="|"+"|"/"|"-"
 "<="			{ return token::T_LessEqual; }
 "=="			{ return token::T_Equal; }
 "!="			{ return token::T_NotEqual; }
-"&&"			{ return token::T_And; }
-"||"			{ return token::T_Or; }
+"&&"			{
+            yylval->op = OP::T_AND;
+            return token::T_And;
+          }
+"||"			{
+            yylval->op = OP::T_OR;
+            return token::T_Or;
+          }
 
 {number}	{ return token::Integer; }
 {id}			{ 
-  yylval->id = new std::string(yytext);
-  return token::Identifier; 
-}
+            yylval->id = new std::string(yytext);
+            return token::Identifier;
+          }
 {symbol}	{ return *YYText(); }
 .				  {}
 %%

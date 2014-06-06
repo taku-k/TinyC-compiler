@@ -203,9 +203,11 @@ void DeclList::PrintNode(void) {
   // } else if (node_[0] == NULL) {
   //   node_[1]->PrintNode();
   // }
-  node_[0]->PrintNode(op_);
   if (node_[1] != NULL) {
     node_[1]->PrintNode();
+  }
+  if (node_[0] != NULL) {
+    node_[0]->PrintNode(op_);
   }
 }
 /*
@@ -215,9 +217,15 @@ void DeclList::PrintNode(void) {
 /* 
  * DeclNode
  */
+DeclNode::DeclNode(std::string *id, TC::TC_Driver *d) {
+  name_ = *id;
+  d->AddId(name_);
+}
+
 DeclNode::DeclNode(std::string *id) {
   name_ = *id;
 }
+
 
 void DeclNode::PrintNode(const int op) {
   switch(op){
@@ -296,9 +304,11 @@ ParamDeclList::ParamDeclList(Nnode* node, Nnode* list) {
 }
 
 void ParamDeclList::PrintNode(void) {
-  node_[0]->PrintNode();
   if (node_[1] != NULL) {
     node_[1]->PrintNode();
+  }
+  if (node_[0] != NULL) {
+    node_[0]->PrintNode();
   }
 }
 /*
@@ -334,12 +344,12 @@ ComStatNode::ComStatNode(Nnode* first, Nnode* second) {
 void ComStatNode::PrintNode(void) {
   std::cout << "{" << std::endl;
   // declartion
-  if (node_[0] != NULL) {
-    node_[0]->PrintNode();
-  }
-  // statement
   if (node_[1] != NULL) {
     node_[1]->PrintNode();
+  }
+  // statement
+  if (node_[0] != NULL) {
+    node_[0]->PrintNode();
   }
   std::cout << "\n}";
 }
@@ -377,9 +387,11 @@ StatList::StatList(Nnode* node, Nnode* list) {
 }
 
 void StatList::PrintNode(void) {
-  node_[0]->PrintNode();
-  if(node_[1] != NULL) {
+  if (node_[1] != NULL) {
     node_[1]->PrintNode();
+  }
+  if (node_[0] != NULL) {
+    node_[0]->PrintNode();
   }
 }
 /*
@@ -390,7 +402,7 @@ void StatList::PrintNode(void) {
  * StatNode
  * node_[0] = 
  */
-StatNode::StatNode(Nnode * node) {
+StatNode::StatNode(Nnode* node) {
   node_[0] = node;
 }
 
@@ -405,18 +417,25 @@ void StatNode::PrintNode(void) {
 
 
 /*
- * ExpressionNode
+ * ExpressionList
  */
-ExpressionNode::ExpressionNode(Nnode *node) {
+ExpressionList::ExpressionList(Nnode* node, Nnode* list) {
   node_[0] = node;
+  node_[1] = list;
 }
 
-void ExpressionNode::PrintNode(void) {
-
+void ExpressionList::PrintNode(void) {
+  if (node_[1] != NULL) {
+    node_[1]->PrintNode();
+  }
+  if (node_[0] != NULL) {
+    node_[0]->PrintNode();
+  }
 }
 /*
- * ExpressionNode END
+ * ExpressionList END
  */
+
 
 /*
  * IFStatNode
@@ -490,3 +509,54 @@ void RETURNStatNode::PrintNode(void) {
 /*
  * RETURNStatNode END
  */
+
+
+/*
+ * AssignExprNode 
+ */
+AssignExprNode::AssignExprNode(Nnode *node) {
+  node_[0] = node;
+}
+
+AssignExprNode::AssignExprNode(std::string *id, Nnode* node) {
+  name_ = *id;
+  node_[0] = node;
+}
+
+void AssignExprNode::PrintNode(void) {
+  if (node_[0] != NULL) {
+    if (name_ == "") {
+      node_[0]->PrintNode();
+    } else {
+      std::cout << "(= " << name_ << " ";
+      node_[0]->PrintNode();
+    }
+  }
+}
+/*
+ * AssignExprNode END
+ */
+
+/*
+ * ExprNode
+ */
+ExprNode::ExprNode(int op, Nnode *n1, Nnode *n2) {
+  op_ = op;
+  node_[0] = n1;
+  node_[1] = n2;
+}
+
+void ExprNode::PrintNode(void) {
+  switch(op_) {
+    case(OP::T_OR):
+      std::cout << "(|| ";
+  }
+  if (node_[0] != NULL) {
+    node_[0]->PrintNode();
+  }
+  std::cout << " ";
+  if (node_[1] != NULL) {
+    node_[1]->PrintNode();
+  }
+  std::cout << ")";
+}

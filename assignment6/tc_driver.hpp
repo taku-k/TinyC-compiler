@@ -1,4 +1,8 @@
+#ifndef __TCDRIVER_HPP__
+#define __TCDRIVER_HPP__ 1
+
 #include <string>
+
 #include "tc_parser.tab.hh"
 #include "tc_scanner.hpp"
 #include "node.hpp"
@@ -16,6 +20,9 @@ public:
 
   void print();
 
+  void debug();
+
+  void AddId(std::string id);
   // NodeList* getNodeList(void) {
   //   if (nodel == NULL) {
   //     nodel = new NodeList();
@@ -24,10 +31,13 @@ public:
   // }
 
 private:
-	TC::TC_Parser *parser;
-	TC::TC_Scanner *scanner;
+  TC::TC_Parser *parser;
+  TC::TC_Scanner *scanner;
   NodeList *nodel;
+
+  std::vector<std::string> idtable;
 };
 
 }
 
+#endif

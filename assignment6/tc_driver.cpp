@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <vector>
 
 #include "tc_driver.hpp"
 
@@ -24,6 +25,7 @@ void TC::TC_Driver::parse() {
 	delete(nodel);
 	try {
 		nodel = new NodeList();
+		// std::cout << this << std::endl;
 	} catch (std::bad_alloc &ba) {
 		std::cerr << "Faild nodelist" << std::endl;
 		exit(EXIT_FAILURE);
@@ -45,4 +47,14 @@ void TC::TC_Driver::parse() {
 
 void TC::TC_Driver::print() {
 	nodel->PrintTree();
+}
+
+void TC::TC_Driver::debug() {
+	for (int i = 0; i < idtable.size(); i++) {
+		std::cout << idtable[i] << std::endl;
+	}
+}
+
+void TC::TC_Driver::AddId(std::string id) {
+	idtable.push_back(id);
 }
