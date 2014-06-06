@@ -55,8 +55,14 @@
 %type <node> declaration_list
 %type <node> declarator
 %type <node> declarator_list
+%type <node> function_definition
+%type <node> compound_statement
+%type <node> parameter_type_list
+%type <node> parameter_declaration
 
-%destructor { if ($$)  { delete ($$); ($$) = nullptr; } } <id>
+
+
+%destructor { if ($$)  { delete ($$); ($$) = NULL; } } <id>
 
 
 %%
@@ -67,28 +73,28 @@ program:
 	;
 external_declaration:
 	declaration 	{ $$ = $1; }
-	| function_definition		{}
+	| function_definition		{ $$ = $1; }
 	;
 declaration:
-	T_Int declarator_list ';'	{ $$ = new DeclIntListNode(OP::INT, $2); }
+	T_Int declarator_list ';'	{ $$ = new DeclListNode(OP::INT, $2); }
 	;
 declarator_list:
-	declarator 		{ $$ = $1; }
-	| declarator ',' declarator_list	{ $$ = new DeclIntListNode(OP::INT, $1, $3); }
+	declarator 		{ $$ = new DeclListNode(OP::INT, $1, NULL); }
+	| declarator ',' declarator_list	{ $$ = new DeclListNode(OP::INT, $1, $3); }
 	;
 declarator:
-	Identifier	{ $$ = new DeclIntNode($1); }
+	Identifier	{ $$ = new DeclNode($1); }
 	;
 function_definition:
-	T_Int declarator '(' ')' compound_statement		{}
-	| T_Int declarator '(' parameter_type_list ')' compound_statement		{}
+	T_Int declarator '(' ')' compound_statement		{ $$ = new FuncNode(new RetNode(OP::INT), $2, NULL, $5); }
+	| T_Int declarator '(' parameter_type_list ')' compound_statement		{ $$ = new FuncNode(new RetNode(OP::INT), $2, $4, $6); }
 	;
 parameter_type_list:
-	parameter_declaration		{}
-	| parameter_type_list ',' parameter_declaration		{}
+	parameter_declaration		{ $$ = new ParamDeclList($1, NULL); }
+	| parameter_declaration ',' parameter_type_list		{ $$ = new ParamDeclList($1, $3); }
 	;
 parameter_declaration:
-	T_Int declarator 		{}
+	T_Int declarator 		{ $$ = new ParamDeclNode(OP::INT, $2); }
 	;
 statement:
 	';'

@@ -140,7 +140,79 @@ Nnode *Nnode::getnode(int num) {
 // Nnode end
 
 
+
+
+
+/* IdentifierNode
+ * 識別子ノード
+ */
+IdentifierNode::IdentifierNode(std::string id) {
+  op_ = OP::ID;
+  name_ = id;
+}
+
+void IdentifierNode::PrintNode(void) {
+  std::cout << name_;
+}
 /*
+ * END
+ */
+
+
+/* DeclListNode
+ * 
+ */
+DeclListNode::DeclListNode(int op, Nnode* list) {
+  op_ = op;
+  node_[1] = list;
+}
+
+DeclListNode::DeclListNode(int op, Nnode* node, Nnode* list) {
+  op_ = op;
+  node_[0] = node;
+  node_[1] = list;
+}
+
+void DeclListNode::PrintNode(void) {
+  if (node_[1] != NULL && node_[0] != NULL) {
+    node_[0]->PrintDecl(op_);
+    node_[1]->PrintNode();
+  } else if (node_[0] != NULL) {
+    node_[0]->PrintDecl(op_);
+  } else if (node_[0] == NULL) {
+    node_[1]->PrintNode();
+  }
+}
+/*
+ * END
+ */
+
+/* 
+ * DeclNode
+ */
+DeclNode::DeclNode(std::string *id) {
+  name_ = *id;
+}
+
+void DeclNode::PrintDecl(int op) {
+  switch(op){
+    case(OP::INT):
+      std::cout << "(int " << name_ << ") ";
+    default:
+      return;
+  }
+  return;
+}
+
+void DeclNode::PrintDecl(void) {
+  std::cout << name_ << " ";
+}
+/*
+ * END
+ */
+
+
+ /*
  * FuncNode 
  * 関数ノード
  */
@@ -154,10 +226,10 @@ FuncNode::FuncNode(Nnode* ret, Nnode* id,
 }
 
 void FuncNode::PrintNode(void) {
-  std::cout << "((";
+  std::cout << "( ( ";
   node_[0]->PrintNode();
   std::cout << " ";
-  node_[1]->PrintNode();
+  node_[1]->PrintDecl();
   std::cout << ") (";
   node_[2]->PrintNode();
   std::cout << ")\n(\n";
@@ -168,3 +240,53 @@ void FuncNode::PrintNode(void) {
  *  FundNode END
  */
 
+
+/* RetNode
+ * 返り値ノード
+ */
+RetNode::RetNode(int op) {
+  op_ = op;
+}
+
+void RetNode::PrintNode(void) {
+  switch(op_) {
+    case(OP::INT):
+      std::cout << "int";
+  }
+}
+/*
+ * RetNode END
+ */
+
+
+/* ParamDeclList
+ * 
+ */
+ParamDeclList::ParamDeclList(Nnode* node, Nnode* list) {
+  node_[0] = node;
+  node_[1] = list;
+}
+
+void ParamDeclList::PrintNode(void) {
+  node_[0]->PrintNode();
+  if (node_[1] != NULL) {
+    node_[1]->PrintNode();
+  }
+}
+/*
+ * ParamDeclList END
+ */
+
+
+/*
+ * ParamDeclNode
+ */
+ParamDeclNode::ParamDeclNode(int op, Nnode* node) {
+  op_ = op;
+  node_[0] = node;
+}
+
+void ParamDeclNode::PrintNode(void) {
+  // DeclNodeでintも表示してもらう
+  node_[0]->PrintDecl(op_);
+}

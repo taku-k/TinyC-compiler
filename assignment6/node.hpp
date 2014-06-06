@@ -66,7 +66,9 @@ public:
 	std::string getname(void);
 	Nnode *getnode(int num);
 
-  virtual void PrintNode(void){};
+  virtual void PrintNode(void) {}
+  virtual void PrintDecl(int) {}
+  virtual void PrintDecl(void) {}
 
 	static Nnode* MakeNode(int op, std::string str="", int val=0,
           Nnode *a=NULL, Nnode *b=NULL, Nnode *c=NULL, Nnode *d=NULL);
@@ -87,78 +89,61 @@ protected:
 };
 
 
+
+class IdentifierNode : public Nnode {
+public:
+  IdentifierNode(std::string id);
+  void PrintNode(void);
+private:
+};
+
+
+class DeclListNode : public Nnode {
+public:
+  // node_[0] には　nodeがつまりはIdが入る
+  // node_[1] には後ろに続くリストが入る
+  DeclListNode(int op, Nnode* list);
+  DeclListNode(int op, Nnode* node, Nnode* list);
+  void PrintNode(void);
+private:
+};
+
+class DeclNode : public Nnode {
+public:
+  DeclNode(std::string *id);
+  void PrintDecl(int op);
+  // ParamDeclNodeとの連携で"int"をどのタイミングで表示する？
+  void PrintDecl(void);
+private:
+};
+
 class FuncNode : public Nnode {
 public:
   FuncNode(Nnode* ret, Nnode* id, Nnode* paramlist, Nnode* stat);
-
   void PrintNode(void);
 private:
 };
 
 class RetNode : public Nnode {
 public:
-  RetNode(std::string ret) {
-    name_ = ret;
-    if (ret == "INT") op_ = OP::INT;
-  }
-  void PrintNode(void) {
-    std::cout << name_;
-  }
-private:
-};
-
-class IdentifierNode : public Nnode {
-public:
-  IdentifierNode(std::string id) {
-    op_ = OP::ID;
-    name_ = id;
-  }
-  void PrintNode(void) {
-    std::cout << name_;
-  }
+  RetNode(int op);
+  void PrintNode(void);
 private:
 };
 
 
-class DeclIntListNode : public Nnode {
+class ParamDeclList : public Nnode {
 public:
-  // node_[0] には　nodeがつまりはIdが入る
-  // node_[1] には後ろに続くリストが入る
-  DeclIntListNode(int op, Nnode* node) {
-    op_ = op;
-    node_[1] = node;
-  }
-  DeclIntListNode(int op, Nnode* node, Nnode* list) {
-    op_ = op;
-    node_[0] = node;
-    node_[1] = list;
-  }
-  void PrintNode(void) {
-    if (node_[1] != NULL && node_[0] != NULL) {
-      node_[0]->PrintNode();
-      node_[1]->PrintNode();
-    } else if (node_[0] == NULL) {
-      node_[1]->PrintNode();
-    }
-  }
+  // 一つ目がノード
+  ParamDeclList(Nnode* node, Nnode* list);
+  void PrintNode(void);
 private:
 };
 
-class DeclIntNode : public Nnode {
+class ParamDeclNode : public Nnode {
 public:
-  DeclIntNode(std::string *id) {
-    name_ = *id;
-  }
-  void PrintNode(void) {
-    std::cout << "(int " << name_ << ") ";
-  }
+  ParamDeclNode(int op, Nnode* node);
+  void PrintNode(void);
 private:
-};
-
-class ParamListNode : public Nnode {
-public:
-
-private:
-  std::vector<Nnode*> list;
 };
 
