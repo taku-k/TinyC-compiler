@@ -6,13 +6,13 @@ NodeList::~NodeList(void) {
 }
 
 void NodeList::PrintTree(void) {
-  std::cout << "{" << std::endl;
+  std::cout << "---start---" << std::endl;
   for (int i = 0; i < list.size(); i++) {
     std::cout << "(";
     list[i]->PrintNode();
     std::cout << ")";
   }
-  std::cout << "\n}" << std::endl;
+  std::cout << "\n---end---" << std::endl;
 }
 
 void NodeList::Debug(void) {
@@ -37,7 +37,7 @@ Nnode::Nnode(void) {
     node_[i] = NULL;
   }
 }
-Nnode::Nnode(int op, std::string str) {
+Nnode::Nnode(const int op, std::string str) {
 	op_ = op;
 	name_ = str;
 	value_ = 0;
@@ -46,7 +46,7 @@ Nnode::Nnode(int op, std::string str) {
 	}
 }
 
-Nnode::Nnode(int op, int val) {
+Nnode::Nnode(const int op, int val) {
 	op_ = op;
 	name_ = "";
 	value_ = val;
@@ -55,7 +55,7 @@ Nnode::Nnode(int op, int val) {
 	}
 }
 
-Nnode::Nnode(int op, Nnode *a) {
+Nnode::Nnode(const int op, Nnode *a) {
 	op_ = op;
 	name_ = "";
 	value_ = 0;
@@ -65,7 +65,7 @@ Nnode::Nnode(int op, Nnode *a) {
   node_[3] = NULL;
 }
 
-Nnode::Nnode(int op, Nnode *a, Nnode *b) {
+Nnode::Nnode(const int op, Nnode *a, Nnode *b) {
   op_ = op;
   name_ = "";
   value_ = 0;
@@ -75,7 +75,7 @@ Nnode::Nnode(int op, Nnode *a, Nnode *b) {
   node_[3] = NULL;
 }
 
-Nnode::Nnode(int op, Nnode *a, Nnode *b, Nnode *c) {
+Nnode::Nnode(const int op, Nnode *a, Nnode *b, Nnode *c) {
   op_ = op;
   name_ = "";
   value_ = 0;
@@ -85,7 +85,7 @@ Nnode::Nnode(int op, Nnode *a, Nnode *b, Nnode *c) {
   node_[3] = NULL;
 }
 
-Nnode::Nnode(int op, Nnode *a, Nnode *b, Nnode *c, Nnode *d) {
+Nnode::Nnode(const int op, Nnode *a, Nnode *b, Nnode *c, Nnode *d) {
   op_ = op;
   name_ = "";
   value_ = 0;
@@ -95,7 +95,7 @@ Nnode::Nnode(int op, Nnode *a, Nnode *b, Nnode *c, Nnode *d) {
   node_[3] = d;
 }
 
-Nnode* Nnode::MakeNode(int op, std::string str, int val, Nnode *a /* NULL */,
+Nnode* Nnode::MakeNode(const int op, std::string str, int val, Nnode *a /* NULL */,
         Nnode *b /* NULL */, Nnode *c /* NULL */, Nnode *d /* NULL */) {
   if (d != NULL) {
     return new Nnode(op, a, b, c, d);
@@ -158,28 +158,53 @@ void IdentifierNode::PrintNode(void) {
  * END
  */
 
+/* 
+ * DeclTypeNode
+ */
+DeclTypeNode::DeclTypeNode(const int op, Nnode* node) {
+  op_ = op;
+  node_[0] = node;
+}
 
-/* DeclListNode
+void DeclTypeNode::PrintNode(void) {
+  node_[0]->PrintNode();
+}
+/*
+ * DeclTypeNode END
+ */
+
+
+/* DeclList
  * 
  */
-DeclListNode::DeclListNode(int op, Nnode* list) {
+DeclList::DeclList(const int op, Nnode* list) {
   op_ = op;
   node_[1] = list;
 }
 
-DeclListNode::DeclListNode(int op, Nnode* node, Nnode* list) {
+DeclList::DeclList(const int op, Nnode* node, Nnode* list) {
   op_ = op;
   node_[0] = node;
   node_[1] = list;
 }
 
-void DeclListNode::PrintNode(void) {
-  if (node_[1] != NULL && node_[0] != NULL) {
-    node_[0]->PrintDecl(op_);
-    node_[1]->PrintNode();
-  } else if (node_[0] != NULL) {
-    node_[0]->PrintDecl(op_);
-  } else if (node_[0] == NULL) {
+DeclList::DeclList(Nnode* node, Nnode* list) {
+  node_[0] = node;
+  node_[1] = list;
+}
+
+
+void DeclList::PrintNode(void) {
+  // if (node_[1] != NULL && node_[0] != NULL) {
+  //   node_[0]->PrintDecl(op_);
+  //   node_[1]->PrintNode();
+  // } else if (node_[0] != NULL) {
+  //   node_[0]->PrintDecl(op_);
+  // } else if (node_[0] == NULL) {
+  //   node_[1]->PrintNode();
+  // }
+  node_[0]->PrintNode(op_);
+  if (node_[1] != NULL) {
     node_[1]->PrintNode();
   }
 }
@@ -194,7 +219,7 @@ DeclNode::DeclNode(std::string *id) {
   name_ = *id;
 }
 
-void DeclNode::PrintDecl(int op) {
+void DeclNode::PrintNode(const int op) {
   switch(op){
     case(OP::INT):
       std::cout << "(int " << name_ << ") ";
@@ -204,7 +229,7 @@ void DeclNode::PrintDecl(int op) {
   return;
 }
 
-void DeclNode::PrintDecl(void) {
+void DeclNode::PrintNode(void) {
   std::cout << name_ << " ";
 }
 /*
@@ -226,15 +251,18 @@ FuncNode::FuncNode(Nnode* ret, Nnode* id,
 }
 
 void FuncNode::PrintNode(void) {
-  std::cout << "( ( ";
+  std::cout << "( ";
   node_[0]->PrintNode();
   std::cout << " ";
-  node_[1]->PrintDecl();
+  node_[1]->PrintNode();
   std::cout << ") (";
-  node_[2]->PrintNode();
-  std::cout << ")\n(\n";
-  node_[3]->PrintNode();
-  std::cout << "))\n";
+  if (node_[2] != NULL) {
+    node_[2]->PrintNode();
+  }
+  std::cout << ")\n";
+  if (node_[3] != NULL) {
+    node_[3]->PrintNode();
+  }
 }
 /*
  *  FundNode END
@@ -244,7 +272,7 @@ void FuncNode::PrintNode(void) {
 /* RetNode
  * 返り値ノード
  */
-RetNode::RetNode(int op) {
+RetNode::RetNode(const int op) {
   op_ = op;
 }
 
@@ -281,12 +309,184 @@ void ParamDeclList::PrintNode(void) {
 /*
  * ParamDeclNode
  */
-ParamDeclNode::ParamDeclNode(int op, Nnode* node) {
+ParamDeclNode::ParamDeclNode(const int op, Nnode* node) {
   op_ = op;
   node_[0] = node;
 }
 
 void ParamDeclNode::PrintNode(void) {
   // DeclNodeでintも表示してもらう
-  node_[0]->PrintDecl(op_);
+  node_[0]->PrintNode(op_);
 }
+/*
+ * ParamDeclNode END
+ */
+
+
+/*
+ * ComStatNode { (first)int a,b; | (second)if(a>b)...}
+ */
+ComStatNode::ComStatNode(Nnode* first, Nnode* second) {
+  node_[0] = first;
+  node_[1] = second;
+}
+
+void ComStatNode::PrintNode(void) {
+  std::cout << "{" << std::endl;
+  // declartion
+  if (node_[0] != NULL) {
+    node_[0]->PrintNode();
+  }
+  // statement
+  if (node_[1] != NULL) {
+    node_[1]->PrintNode();
+  }
+  std::cout << "\n}";
+}
+/*
+ * ComStatNode END
+ */
+
+
+/*
+ * DeclarationList
+ * node_[0] = DeclTypeNode, node_[1] = DeclarationList
+ */
+DeclarationList::DeclarationList(Nnode* node, Nnode* list) {
+  node_[0] = node;
+  node_[1] = list;
+}
+
+// void DeclarationList::PrintNode(void) {
+//   node_[0]->PrintNode();
+//   if(node_[1] != NULL) {
+//     node_[1]->PrintNode();
+//   }
+// }
+/*
+ * DeclarationNode END
+ */
+
+
+/*
+ * StatList
+ */
+StatList::StatList(Nnode* node, Nnode* list) {
+  node_[0] = node;
+  node_[1] = list;
+}
+
+void StatList::PrintNode(void) {
+  node_[0]->PrintNode();
+  if(node_[1] != NULL) {
+    node_[1]->PrintNode();
+  }
+}
+/*
+ * StatList END
+ */
+
+/*
+ * StatNode
+ * node_[0] = 
+ */
+StatNode::StatNode(Nnode * node) {
+  node_[0] = node;
+}
+
+void StatNode::PrintNode(void) {
+  if (node_[0] != NULL) {
+    node_[0]->PrintNode();
+  }
+}
+/*
+ * StatNode END
+ */
+
+
+/*
+ * ExpressionNode
+ */
+ExpressionNode::ExpressionNode(Nnode *node) {
+  node_[0] = node;
+}
+
+void ExpressionNode::PrintNode(void) {
+
+}
+/*
+ * ExpressionNode END
+ */
+
+/*
+ * IFStatNode
+ */
+IFStatNode::IFStatNode(Nnode* expr, Nnode* stat) {
+  node_[0] = expr;
+  node_[1] = stat;
+}
+
+IFStatNode::IFStatNode(Nnode* expr, Nnode* stat, Nnode* elsestat) {
+  node_[0] = expr;
+  node_[1] = stat;
+  node_[2] = elsestat;
+}
+
+void IFStatNode::PrintNode(void) {
+  std::cout << "(IF ";
+  if (node_[0] != NULL) {
+    node_[0]->PrintNode();
+  }
+  std::cout << std::endl;
+  if (node_[1] != NULL) {
+    node_[1]->PrintNode();
+  }
+  if (node_[2] != NULL) {
+    std::cout << "ELSE {\n";
+    node_[2]->PrintNode();
+    std::cout << "\n}"; 
+  }
+}
+/*
+ * IFStatNode END
+ */
+
+/*
+ * WHILEStatNode
+ */
+WHILEStatNode::WHILEStatNode(Nnode* expr, Nnode* stat) {
+  node_[0] = expr;
+  node_[1] = stat;
+}
+
+void WHILEStatNode::PrintNode(void) {
+  std::cout << "(WHILE ";
+  if (node_[0] != NULL) {
+    node_[0]->PrintNode();
+  }
+  std::cout << std::endl;
+  if (node_[1] != NULL) {
+    node_[1]->PrintNode();
+  }
+}
+/*
+ * WHILEStatNode END
+ */
+
+
+/*
+ * RETURNStatNode
+ */
+RETURNStatNode::RETURNStatNode(Nnode* expr) {
+  node_[0] = expr;
+}
+
+void RETURNStatNode::PrintNode(void) {
+  std::cout << "(RETURN ";
+  if (node_[0] != NULL) {
+    node_[0]->PrintNode();
+  }
+}
+/*
+ * RETURNStatNode END
+ */

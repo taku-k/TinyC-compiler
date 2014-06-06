@@ -27,6 +27,8 @@
 #undef yylex
 #define yylex scanner.yylex
 
+	int TYPE;
+
 }
 
 %union{
@@ -59,7 +61,9 @@
 %type <node> compound_statement
 %type <node> parameter_type_list
 %type <node> parameter_declaration
-
+%type <node> statement_list
+%type <node> statement
+%type <node> expression
 
 
 %destructor { if ($$)  { delete ($$); ($$) = NULL; } } <id>
@@ -76,11 +80,11 @@ external_declaration:
 	| function_definition		{ $$ = $1; }
 	;
 declaration:
-	T_Int declarator_list ';'	{ $$ = new DeclListNode(OP::INT, $2); }
+	T_Int declarator_list ';'	{ $$ = new DeclTypeNode(OP::INT, $2); }
 	;
 declarator_list:
-	declarator 		{ $$ = new DeclListNode(OP::INT, $1, NULL); }
-	| declarator ',' declarator_list	{ $$ = new DeclListNode(OP::INT, $1, $3); }
+	declarator 		{ $$ = new DeclList(OP::INT, $1, NULL); }
+	| declarator ',' declarator_list	{ $$ = new DeclList(OP::INT, $1, $3); }
 	;
 declarator:
 	Identifier	{ $$ = new DeclNode($1); }
@@ -97,31 +101,31 @@ parameter_declaration:
 	T_Int declarator 		{ $$ = new ParamDeclNode(OP::INT, $2); }
 	;
 statement:
-	';'
-	| expression ';'	{}
-	| compound_statement	{}
-	| T_If '(' expression ')' statement 	{}
-	| T_If '(' expression ')' statement T_Else statement 		{}
-	| T_While '(' expression ')' statement 		{}
-	| T_Return expression ';'		{}
+	';'		{ $$ = new StatNode(NULL); }
+	| expression ';'	{ $$ = new ExpressionNode($1); }
+	| compound_statement	{ $$ = $1; }
+	| T_If '(' expression ')' statement 	{ $$ = new IFStatNode($3, $5); }
+	| T_If '(' expression ')' statement T_Else statement 		{ $$ = new IFStatNode($3, $5, $7); }
+	| T_While '(' expression ')' statement 		{ $$ = new WHILEStatNode($3, $5); }
+	| T_Return expression ';'		{ $$ = new RETURNStatNode($2); }
 	;
 compound_statement:
-	'{' declaration_list '}'						{}
-	| '{' declaration_list statement_list '}'		{}
-	| '{' statement_list '}'	{}
-	| '{' '}'	{}
+	'{' declaration_list '}'	{ $$ = new ComStatNode($2, NULL); }
+	| '{' declaration_list statement_list '}'		{ $$ = new ComStatNode($2, $3); }
+	| '{' statement_list '}'	{ $$ = new ComStatNode(NULL, $2); }
+	| '{' '}'	{ $$ = new ComStatNode(NULL, NULL); }
 	;
 declaration_list:
-	declaration 	{}
-	| declaration_list declaration		{}
+	declaration 	{ $$ = new DeclarationList($1, NULL); }
+	| declaration declaration_list		{ $$ = new DeclarationList($1, $2); }
 	;
 statement_list:
-	statement 	{}
-	| statement_list statement 		{}
+	statement 	{ $$ = new StatList($1, NULL); }
+	| statement_list statement 		{ $$ = new StatList($1, $2); }
 	;
 expression:
-	assign_expr 	{}
-	| expression ',' assign_expr 		{}
+	assign_expr 	{$$ = NULL; }
+	| expression ',' assign_expr 		{ $$ = NULL; }
 	;
 assign_expr:
 	logical_OR_expr 	{}
