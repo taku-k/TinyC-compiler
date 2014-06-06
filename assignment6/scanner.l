@@ -3,7 +3,6 @@
 	#include <iostream>
 	#include "tc_scanner.hpp"
 
-	int yylval;
 	typedef TC::TC_Parser::token token;
 %}
 %option debug
@@ -37,7 +36,10 @@ symbol			";"|","|"("|")"|"{"|"}"|">"|"<"|"*"|"="|"+"|"/"|"-"
 "||"			{ return token::T_Or; }
 
 {number}	{ return token::Integer; }
-{id}			{ return token::Identifier; }
+{id}			{ 
+  yylval->id = new std::string(yytext);
+  return token::Identifier; 
+}
 {symbol}	{ return *YYText(); }
 .				  {}
 %%

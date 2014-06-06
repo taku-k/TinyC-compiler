@@ -32,6 +32,7 @@
 %union{
 	Nnode *node;
 	std::string *id;
+	char *idd;
 }
 
 %token	T_Int
@@ -55,6 +56,7 @@
 %type <node> declarator
 %type <node> declarator_list
 
+%destructor { if ($$)  { delete ($$); ($$) = nullptr; } } <id>
 
 
 %%
@@ -72,7 +74,7 @@ declaration:
 	;
 declarator_list:
 	declarator 		{ $$ = $1; }
-	| declarator ',' declarator_list	{ /*$$ = new DeclIntListNode(OP::INT, $1, $3);*/ }
+	| declarator ',' declarator_list	{ $$ = new DeclIntListNode(OP::INT, $1, $3); }
 	;
 declarator:
 	Identifier	{ $$ = new DeclIntNode($1); }

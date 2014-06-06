@@ -3,6 +3,7 @@
 #include <string>
 #include <map>
 #include <algorithm>
+#include <string.h>
 
 class NodeList;
 class Nnode;
@@ -146,7 +147,7 @@ private:
 class DeclIntNode : public Nnode {
 public:
   DeclIntNode(std::string *id) {
-    
+    name_ = *id;
   }
   void PrintNode(void) {
     std::cout << "(int " << name_ << ") ";

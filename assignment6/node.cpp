@@ -8,7 +8,9 @@ NodeList::~NodeList(void) {
 void NodeList::PrintTree(void) {
   std::cout << "{" << std::endl;
   for (int i = 0; i < list.size(); i++) {
+    std::cout << "(";
     list[i]->PrintNode();
+    std::cout << ")";
   }
   std::cout << "\n}" << std::endl;
 }

@@ -12,13 +12,15 @@ namespace TC{
 
 class TC_Scanner : public yyFlexLexer{
 public:
-	TC_Scanner(std::istream *in) : yyFlexLexer(in) {};
+  TC_Scanner(std::istream *in) : yyFlexLexer(in),yylval(NULL){};
 
-	int yylex(TC::TC_Parser::semantic_type *lval) {
-		return(yylex());
-	}
+  int yylex(TC::TC_Parser::semantic_type *lval) {
+    yylval = lval;
+    return(yylex());
+  }
 private:
-	int yylex();
+  int yylex();
+  TC::TC_Parser::semantic_type *yylval;
 };
 
 }
