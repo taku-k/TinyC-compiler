@@ -15,7 +15,8 @@ class Nnode;
 
 namespace OP{
   enum {
-    FUNC, INT, ID, T_OR, T_AND,
+    FUNC, INT, ID, OR, AND, EQUAL, NOTEQUAL, LESSEQUAL,
+     GREATEREQUAL, LESS, GREATER, ADD, SUB, MUL, DIV, MINUS
   };
 }
 
@@ -47,16 +48,17 @@ private:
 // ノード
 class Nnode{
 public:
-	const static int N = 4;
+
+  static const int N = 4;
 
   // constructor
-  Nnode(void);
-  Nnode(const int op, std::string str);
-  Nnode(const int op, int val);
-  Nnode(const int op, Nnode *a);
-  Nnode(const int op, Nnode *a, Nnode *b);
-  Nnode(const int op, Nnode *a, Nnode *b, Nnode *c);
-  Nnode(const int op, Nnode *a, Nnode *b, Nnode *c, Nnode *d);
+  Nnode();
+  // Nnode(const int op, std::string str);
+  // Nnode(const int op, int val);
+  // Nnode(const int op, Nnode *a);
+  // Nnode(const int op, Nnode *a, Nnode *b);
+  // Nnode(const int op, Nnode *a, Nnode *b, Nnode *c);
+  // Nnode(const int op, Nnode *a, Nnode *b, Nnode *c, Nnode *d);
 
   // deconstructor
   virtual ~Nnode(void) {
@@ -71,20 +73,19 @@ public:
 	std::string getname(void);
 	Nnode *getnode(int num);
 
-  virtual void PrintNode(void) {
-    if (node_[1] != NULL) {
-      node_[1]->PrintNode();
-    }
-    if (node_[0] != NULL) {
-      node_[0]->PrintNode();
+  virtual void PrintNode(void) {}
+  virtual void PrintNode(int) {}
+
+  inline void PrintNum(int i) {
+    if (node_[i] != NULL) {
+      node_[i]->PrintNode();
     }
   }
-  virtual void PrintNode(int) {}
   // virtual void PrintDecl(int) {}
   // virtual void PrintDecl(void) {}
 
-	static Nnode* MakeNode(const int op, std::string str="", int val=0,
-          Nnode *a=NULL, Nnode *b=NULL, Nnode *c=NULL, Nnode *d=NULL);
+  // static Nnode* MakeNode(const int op, std::string str="", int val=0,
+ //          Nnode *a=NULL, Nnode *b=NULL, Nnode *c=NULL, Nnode *d=NULL);
   // static Nnode* MakeStat();
   // static Nnode* MakeFuncDecl();
   // static Nnode* MakeIfStat();
@@ -105,7 +106,14 @@ protected:
 
 class IdentifierNode : public Nnode {
 public:
-  IdentifierNode(std::string id);
+  IdentifierNode(std::string *id);
+  void PrintNode(void);
+private:
+};
+
+class IntegerNode : public Nnode {
+public:
+  IntegerNode(int val);
   void PrintNode(void);
 private:
 };
@@ -133,7 +141,7 @@ private:
 
 class DeclNode : public Nnode {
 public:
-  DeclNode(std::string *id);
+  DeclNode(Nnode *node);
   DeclNode(std::string *id, TC::TC_Driver *d);
   void PrintNode(const int op);
   // ParamDeclNodeとの連携で"int"をどのタイミングで表示する？
@@ -211,6 +219,7 @@ private:
 // expression(bison)
 class ExpressionList : public Nnode {
 public:
+  // node_[0] = AssignExprNode, node_[1] = ExpressionList
   ExpressionList(Nnode* node, Nnode* list);
   void PrintNode(void);
 private:
@@ -244,19 +253,42 @@ private:
 
 class AssignExprNode : public Nnode {
 public:
-  // node_[0] = AssignExprNode, node_[1] = ExpressionList
   AssignExprNode(Nnode *node);
-  AssignExprNode(std::string *id, Nnode* node);
+  AssignExprNode(Nnode *id, Nnode* node);
   void PrintNode(void);
 private:
 };
 
-// このクラスはexprすべてを管理する
+// このクラスはlogical, equalty, relational, alithimeticを管理する
 class ExprNode : public Nnode {
 public:
-  ExprNode(int op, Nnode *n1, Nnode *n2);
+  ExprNode(const int op, Nnode *n1, Nnode *n2);
   void PrintNode(void);
 private:
 };
+
+class UnaryNode : public Nnode {
+public:
+  // node_[0] = 
+  UnaryNode(const int op, Nnode *node);
+  void PrintNode(void);
+private:
+};
+
+class FuncCallNode : public Nnode {
+public:
+  FuncCallNode(Nnode *id, Nnode *args);
+  void PrintNode(void);
+private:
+};
+
+class FuncArgsNode : public Nnode {
+public:
+  FuncArgsNode(Nnode *node, Nnode *list);
+  void PrintNode(void);
+private:
+};
+
+
 
 #endif

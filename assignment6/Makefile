@@ -41,4 +41,3 @@ scanner: scanner.l
 .PHONY: clean
 clean:
 	rm -rf $(CLEANLIST)
-

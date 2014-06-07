@@ -10,7 +10,7 @@ void NodeList::PrintTree(void) {
   for (int i = 0; i < list.size(); i++) {
     std::cout << "(";
     list[i]->PrintNode();
-    std::cout << ")";
+    std::cout << ")\n";
   }
   std::cout << "\n---end---" << std::endl;
 }
@@ -29,94 +29,89 @@ void NodeList::Debug(void) {
 
 
 // Nnode methods 
-Nnode::Nnode(void) {
-  op_ = 0;
-  name_ = "";
-  value_ = 0;
-  for (int i = 0; i < Nnode::N; i++) {
-    node_[i] = NULL;
-  }
-}
-Nnode::Nnode(const int op, std::string str) {
-	op_ = op;
-	name_ = str;
-	value_ = 0;
-	for (int i = 0; i < Nnode::N; i++) {
-		node_[i] = NULL;
-	}
-}
+Nnode::Nnode() : op_(0), name_(""), value_(0), node_() {}
 
-Nnode::Nnode(const int op, int val) {
-	op_ = op;
-	name_ = "";
-	value_ = val;
-	for (int i = 0; i < Nnode::N; i++) {
-		node_[i] = NULL;
-	}
-}
 
-Nnode::Nnode(const int op, Nnode *a) {
-	op_ = op;
-	name_ = "";
-	value_ = 0;
-	node_[0] = a;
-  node_[1] = NULL;
-  node_[2] = NULL;
-  node_[3] = NULL;
-}
+// Nnode::Nnode(const int op, std::string str) {
+// 	op_ = op;
+// 	name_ = str;
+// 	value_ = 0;
+// 	for (int i = 0; i < Nnode::N; i++) {
+// 		node_[i] = NULL;
+// 	}
+// }
 
-Nnode::Nnode(const int op, Nnode *a, Nnode *b) {
-  op_ = op;
-  name_ = "";
-  value_ = 0;
-  node_[0] = a;
-  node_[1] = b;
-  node_[2] = NULL;
-  node_[3] = NULL;
-}
+// Nnode::Nnode(const int op, int val) {
+// 	op_ = op;
+// 	name_ = "";
+// 	value_ = val;
+// 	for (int i = 0; i < Nnode::N; i++) {
+// 		node_[i] = NULL;
+// 	}
+// }
 
-Nnode::Nnode(const int op, Nnode *a, Nnode *b, Nnode *c) {
-  op_ = op;
-  name_ = "";
-  value_ = 0;
-  node_[0] = a;
-  node_[1] = b;
-  node_[2] = c;
-  node_[3] = NULL;
-}
+// Nnode::Nnode(const int op, Nnode *a) {
+// 	op_ = op;
+// 	name_ = "";
+// 	value_ = 0;
+// 	node_[0] = a;
+//   node_[1] = NULL;
+//   node_[2] = NULL;
+//   node_[3] = NULL;
+// }
 
-Nnode::Nnode(const int op, Nnode *a, Nnode *b, Nnode *c, Nnode *d) {
-  op_ = op;
-  name_ = "";
-  value_ = 0;
-  node_[0] = a;
-  node_[1] = b;
-  node_[2] = c;
-  node_[3] = d;
-}
+// Nnode::Nnode(const int op, Nnode *a, Nnode *b) {
+//   op_ = op;
+//   name_ = "";
+//   value_ = 0;
+//   node_[0] = a;
+//   node_[1] = b;
+//   node_[2] = NULL;
+//   node_[3] = NULL;
+// }
 
-Nnode* Nnode::MakeNode(const int op, std::string str, int val, Nnode *a /* NULL */,
-        Nnode *b /* NULL */, Nnode *c /* NULL */, Nnode *d /* NULL */) {
-  if (d != NULL) {
-    return new Nnode(op, a, b, c, d);
-  } else if (c != NULL) {
-    return new Nnode(op, a, b, c);
-  } else if (b != NULL) {
-    return new Nnode(op, a, b);
-  } else if (a != NULL) {
-    return new Nnode(op, a);
-  } else if (val == 0) {
-    return new Nnode(op, str);
-  } else if (str == "") {
-    return new Nnode(op, val);
-  } else {
-    /*
-     * error
-     */
+// Nnode::Nnode(const int op, Nnode *a, Nnode *b, Nnode *c) {
+//   op_ = op;
+//   name_ = "";
+//   value_ = 0;
+//   node_[0] = a;
+//   node_[1] = b;
+//   node_[2] = c;
+//   node_[3] = NULL;
+// }
 
-  }
-  return NULL;
-}
+// Nnode::Nnode(const int op, Nnode *a, Nnode *b, Nnode *c, Nnode *d) {
+//   op_ = op;
+//   name_ = "";
+//   value_ = 0;
+//   node_[0] = a;
+//   node_[1] = b;
+//   node_[2] = c;
+//   node_[3] = d;
+// }
+
+// Nnode* Nnode::MakeNode(const int op, std::string str, int val, Nnode *a /* NULL */,
+//         Nnode *b /* NULL */, Nnode *c /* NULL */, Nnode *d /* NULL */) {
+//   if (d != NULL) {
+//     return new Nnode(op, a, b, c, d);
+//   } else if (c != NULL) {
+//     return new Nnode(op, a, b, c);
+//   } else if (b != NULL) {
+//     return new Nnode(op, a, b);
+//   } else if (a != NULL) {
+//     return new Nnode(op, a);
+//   } else if (val == 0) {
+//     return new Nnode(op, str);
+//   } else if (str == "") {
+//     return new Nnode(op, val);
+//   } else {
+//     /*
+//      * error
+//      */
+
+//   }
+//   return NULL;
+// }
 
 
 int Nnode::getop(void) {
@@ -146,9 +141,9 @@ Nnode *Nnode::getnode(int num) {
 /* IdentifierNode
  * 識別子ノード
  */
-IdentifierNode::IdentifierNode(std::string id) {
+IdentifierNode::IdentifierNode(std::string *id) {
   op_ = OP::ID;
-  name_ = id;
+  name_ = *id;
 }
 
 void IdentifierNode::PrintNode(void) {
@@ -157,6 +152,23 @@ void IdentifierNode::PrintNode(void) {
 /*
  * END
  */
+
+
+/*
+ * IntegerNode
+ */
+IntegerNode::IntegerNode(int val) : Nnode() {
+  value_ = val;
+}
+
+void IntegerNode::PrintNode(void) {
+  std::cout << value_;
+}
+/*
+ * IntegerNode END
+ */
+
+
 
 /* 
  * DeclTypeNode
@@ -218,27 +230,28 @@ void DeclList::PrintNode(void) {
  * DeclNode
  */
 DeclNode::DeclNode(std::string *id, TC::TC_Driver *d) {
-  name_ = *id;
   d->AddId(name_);
 }
 
-DeclNode::DeclNode(std::string *id) {
-  name_ = *id;
+DeclNode::DeclNode(Nnode *node) {
+  node_[0] = node;
 }
 
 
 void DeclNode::PrintNode(const int op) {
   switch(op){
     case(OP::INT):
-      std::cout << "(int " << name_ << ") ";
-    default:
-      return;
+      std::cout << "(int ";
   }
-  return;
+  PrintNum(0);
+  std::cout << ") ";
 }
 
 void DeclNode::PrintNode(void) {
-  std::cout << name_ << " ";
+  if (node_[0] != NULL) {
+    node_[0]->PrintNode();
+  }
+  std::cout << " ";
 }
 /*
  * END
@@ -260,17 +273,13 @@ FuncNode::FuncNode(Nnode* ret, Nnode* id,
 
 void FuncNode::PrintNode(void) {
   std::cout << "( ";
-  node_[0]->PrintNode();
+  PrintNum(0);
   std::cout << " ";
-  node_[1]->PrintNode();
+  PrintNum(1);
   std::cout << ") (";
-  if (node_[2] != NULL) {
-    node_[2]->PrintNode();
-  }
+  PrintNum(2);
   std::cout << ")\n";
-  if (node_[3] != NULL) {
-    node_[3]->PrintNode();
-  }
+  PrintNum(3);
 }
 /*
  *  FundNode END
@@ -304,12 +313,8 @@ ParamDeclList::ParamDeclList(Nnode* node, Nnode* list) {
 }
 
 void ParamDeclList::PrintNode(void) {
-  if (node_[1] != NULL) {
-    node_[1]->PrintNode();
-  }
-  if (node_[0] != NULL) {
-    node_[0]->PrintNode();
-  }
+  PrintNum(1);
+  PrintNum(0);
 }
 /*
  * ParamDeclList END
@@ -344,13 +349,9 @@ ComStatNode::ComStatNode(Nnode* first, Nnode* second) {
 void ComStatNode::PrintNode(void) {
   std::cout << "{" << std::endl;
   // declartion
-  if (node_[1] != NULL) {
-    node_[1]->PrintNode();
-  }
+  PrintNum(1);
   // statement
-  if (node_[0] != NULL) {
-    node_[0]->PrintNode();
-  }
+  PrintNum(0);
   std::cout << "\n}";
 }
 /*
@@ -387,12 +388,8 @@ StatList::StatList(Nnode* node, Nnode* list) {
 }
 
 void StatList::PrintNode(void) {
-  if (node_[1] != NULL) {
-    node_[1]->PrintNode();
-  }
-  if (node_[0] != NULL) {
-    node_[0]->PrintNode();
-  }
+  PrintNum(1);
+  PrintNum(0);
 }
 /*
  * StatList END
@@ -407,9 +404,8 @@ StatNode::StatNode(Nnode* node) {
 }
 
 void StatNode::PrintNode(void) {
-  if (node_[0] != NULL) {
-    node_[0]->PrintNode();
-  }
+  PrintNum(0);
+  std::cout << std::endl;
 }
 /*
  * StatNode END
@@ -418,6 +414,7 @@ void StatNode::PrintNode(void) {
 
 /*
  * ExpressionList
+ * node_[0] = AssignExprNode, node_[1] = ExpressionList
  */
 ExpressionList::ExpressionList(Nnode* node, Nnode* list) {
   node_[0] = node;
@@ -425,11 +422,11 @@ ExpressionList::ExpressionList(Nnode* node, Nnode* list) {
 }
 
 void ExpressionList::PrintNode(void) {
-  if (node_[1] != NULL) {
-    node_[1]->PrintNode();
-  }
+  PrintNum(1);
   if (node_[0] != NULL) {
+    std::cout << "(";
     node_[0]->PrintNode();
+    std::cout << ")";
   }
 }
 /*
@@ -453,17 +450,13 @@ IFStatNode::IFStatNode(Nnode* expr, Nnode* stat, Nnode* elsestat) {
 
 void IFStatNode::PrintNode(void) {
   std::cout << "(IF ";
-  if (node_[0] != NULL) {
-    node_[0]->PrintNode();
-  }
+  PrintNum(0);
   std::cout << std::endl;
-  if (node_[1] != NULL) {
-    node_[1]->PrintNode();
-  }
+  PrintNum(1);
   if (node_[2] != NULL) {
-    std::cout << "ELSE {\n";
+    std::cout << " ELSE ";
     node_[2]->PrintNode();
-    std::cout << "\n}"; 
+    std::cout << ")\n"; 
   }
 }
 /*
@@ -480,13 +473,10 @@ WHILEStatNode::WHILEStatNode(Nnode* expr, Nnode* stat) {
 
 void WHILEStatNode::PrintNode(void) {
   std::cout << "(WHILE ";
-  if (node_[0] != NULL) {
-    node_[0]->PrintNode();
-  }
+  PrintNum(0);
   std::cout << std::endl;
-  if (node_[1] != NULL) {
-    node_[1]->PrintNode();
-  }
+  PrintNum(1);
+  std::cout << ")\n";
 }
 /*
  * WHILEStatNode END
@@ -502,9 +492,8 @@ RETURNStatNode::RETURNStatNode(Nnode* expr) {
 
 void RETURNStatNode::PrintNode(void) {
   std::cout << "(RETURN ";
-  if (node_[0] != NULL) {
-    node_[0]->PrintNode();
-  }
+  PrintNum(0);
+  std::cout << " )";
 }
 /*
  * RETURNStatNode END
@@ -515,22 +504,33 @@ void RETURNStatNode::PrintNode(void) {
  * AssignExprNode 
  */
 AssignExprNode::AssignExprNode(Nnode *node) {
-  node_[0] = node;
+  node_[1] = node;
 }
 
-AssignExprNode::AssignExprNode(std::string *id, Nnode* node) {
-  name_ = *id;
-  node_[0] = node;
+AssignExprNode::AssignExprNode(Nnode *id, Nnode* node) {
+  node_[0] = id;
+  node_[1] = node;
 }
+
 
 void AssignExprNode::PrintNode(void) {
+  // if (node_[0] != NULL) {
+  //   if (name_ == "") {
+  //     node_[0]->PrintNode();
+  //   } else {
+  //     std::cout << "(= " << name_ << " ";
+  //     node_[0]->PrintNode();
+  //     std::cout << ")";
+  //   }
+  // }
   if (node_[0] != NULL) {
-    if (name_ == "") {
-      node_[0]->PrintNode();
-    } else {
-      std::cout << "(= " << name_ << " ";
-      node_[0]->PrintNode();
-    }
+    std::cout << "(= ";
+    node_[0]->PrintNode();
+    std::cout << " ";
+    PrintNum(1);
+    std::cout << ")";
+  } else {
+    PrintNum(1);
   }
 }
 /*
@@ -540,7 +540,7 @@ void AssignExprNode::PrintNode(void) {
 /*
  * ExprNode
  */
-ExprNode::ExprNode(int op, Nnode *n1, Nnode *n2) {
+ExprNode::ExprNode(const int op, Nnode *n1, Nnode *n2) {
   op_ = op;
   node_[0] = n1;
   node_[1] = n2;
@@ -548,15 +548,99 @@ ExprNode::ExprNode(int op, Nnode *n1, Nnode *n2) {
 
 void ExprNode::PrintNode(void) {
   switch(op_) {
-    case(OP::T_OR):
+    case(OP::OR):
       std::cout << "(|| ";
+      break;
+    case(OP::AND):
+      std::cout << "(&& ";
+      break;
+    case(OP::EQUAL):
+      std::cout << "(== ";
+      break;
+    case(OP::NOTEQUAL):
+      std::cout << "(!= ";
+      break;
+    case(OP::LESS):
+      std::cout << "(< ";
+      break;
+    case(OP::GREATER):
+      std::cout << "(> ";
+      break;
+    case(OP::ADD):
+      std::cout << "(+ ";
+      break;
+    case(OP::SUB):
+      std::cout << "(- ";
+      break;
+    case(OP::MUL):
+      std::cout << "(* ";
+      break;
+    case(OP::DIV):
+      std::cout << "/ ";
+      break;
   }
-  if (node_[0] != NULL) {
-    node_[0]->PrintNode();
-  }
+  PrintNum(0);
   std::cout << " ";
-  if (node_[1] != NULL) {
-    node_[1]->PrintNode();
-  }
+  PrintNum(1);
   std::cout << ")";
+}
+/*
+ * ExprNode END
+ */
+
+/*
+ * UnaryNode
+ */
+UnaryNode::UnaryNode(const int op, Nnode *node) : Nnode() {
+  op_ = op;
+  node_[0] = node;
+}
+
+void UnaryNode::PrintNode(void) {
+  switch(op_) {
+    case(OP::MINUS):
+      std::cout << "(- ";
+      break;
+  }
+  PrintNum(0);
+  std::cout << ")";
+}
+/*
+ * UnaryNode END
+ */
+
+/*
+ * FuncCallNode
+ */
+FuncCallNode::FuncCallNode(Nnode *id, Nnode *args) : Nnode() {
+  node_[0] = id;
+  node_[1] = args;
+}
+
+void FuncCallNode::PrintNode(void) {
+  std::cout << "(FCALL ";
+  PrintNum(0);
+  std::cout << " ";
+  PrintNum(1);
+  std::cout << ")";
+}
+/*
+ * FuncCallNode END
+ */
+
+
+/*
+ * FuncArgsNode
+ */
+FuncArgsNode::FuncArgsNode(Nnode *node, Nnode *list) : Nnode() {
+  node_[0] = node;
+  node_[1] = list;
+}
+
+void FuncArgsNode::PrintNode(void) {
+  PrintNum(1);
+  if (node_[0] != NULL) {
+    PrintNum(0);
+    std::cout << " ";
+  }
 }
