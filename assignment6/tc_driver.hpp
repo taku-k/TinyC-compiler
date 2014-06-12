@@ -1,5 +1,5 @@
 #ifndef __TCDRIVER_HPP__
-#define __TCDRIVER_HPP__ 1
+#define __TCDRIVER_HPP__
 
 #include <string>
 
@@ -11,15 +11,17 @@ namespace TC{
 
 class TC_Driver {
 public:
-  static NodeList nl;
 
 	TC_Driver() : parser(NULL),scanner(NULL),nodel(NULL){};
 	virtual ~TC_Driver();
 
+  // パース関数
 	void parse(const char *filename);
 
+  // エラーを出力する関数
   void error(const std::string &err_m);
 
+  // 構文木を出力する関数 
   void print();
 
   void debug();
