@@ -2,7 +2,7 @@
 	#include <string>
 	#include <iostream>
 	#include "tc_scanner.hpp"
-  #include "node.hpp"
+  #include "ast.hpp"
 
 	typedef TC::TC_Parser::token token;
 %}
@@ -67,6 +67,6 @@ symbol			";"|","|"("|")"|"{"|"}"|">"|"<"|"*"|"="|"+"|"/"|"-"
 
 {symbol}	{ return *YYText(); }
 
-.				  {}
+.				  { driver.error("invalid character"); }
 
 %%

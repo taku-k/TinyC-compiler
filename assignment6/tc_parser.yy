@@ -27,8 +27,6 @@
 #undef yylex
 #define yylex scanner.yylex
 
-  int TYPE;
-
 }
 
 %union{

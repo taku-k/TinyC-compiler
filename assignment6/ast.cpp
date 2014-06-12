@@ -1,4 +1,4 @@
-#include "node.hpp"
+#include "ast.hpp"
 
 // NodeList methods
 NodeList::~NodeList(void) {

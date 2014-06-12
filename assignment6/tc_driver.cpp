@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <cstdlib>
 
 #include "tc_driver.hpp"
 
@@ -13,10 +14,17 @@ TC::TC_Driver::~TC_Driver(){
 	nodel = NULL;
 }
 
-void TC::TC_Driver::parse() {
+void TC::TC_Driver::parse(const char *filename) {
+	// 入力用のファイルストリーム
+	std::ifstream in(filename);
+	if (!in.good()) {
+		std::cout << "No such file\n";
+		exit(EXIT_FAILURE);
+	}
+
 	delete(scanner);
 	try {
-		scanner = new TC::TC_Scanner(&std::cin);
+		scanner = new TC::TC_Scanner(&in, *this);
 	} catch (std::bad_alloc &ba) {
 		std::cerr << "Faild: scanner" << std::endl;
 		exit(EXIT_FAILURE);
@@ -39,10 +47,12 @@ void TC::TC_Driver::parse() {
 		exit(EXIT_FAILURE);
 	}
 
-	const int accept(0);
-	if (parser->parse() != accept) {
-		std::cerr << "Parse failed" << std::endl;
-	}
+	// パースを開始する
+	parser->parse();
+}
+
+void TC::TC_Driver::error(const std::string &err_m) {
+	std::cerr << "Error: " << err_m << std::endl;
 }
 
 void TC::TC_Driver::print() {
