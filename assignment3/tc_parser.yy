@@ -65,8 +65,7 @@ function_definition         : T_Int declarator '(' ')' compound_statement
                             ;
 
 parameter_type_list         : parameter_declaration                           
-                            | parameter_type_list ',' parameter_declaration   
-                            |                                                 
+                            | parameter_type_list ',' parameter_declaration
                             ;
 
 parameter_declaration       : T_Int declarator                           
@@ -156,5 +155,6 @@ constant                    : Integer
 
 %%
 void TC::TC_Parser::error(const std::string &m) {
-	std::cerr << "Error: " << m << std::endl;
+  std::cerr << "Error: " << m << std::endl;
 }
+

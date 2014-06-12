@@ -3,7 +3,6 @@
 	#include <iostream>
 	#include "tc_scanner.hpp"
 
-	int yylval;
 	typedef TC::TC_Parser::token token;
 %}
 %option debug
@@ -14,8 +13,8 @@
 
 delimiter 		[ \t\n]
 whitespace		{delimiter}+
-digit			[0-9]
-number			{digit}+
+digit       [0-9]
+number			[1-9][0-9]*
 letter 			[a-zA-Z]
 id 				{letter}({letter}|{digit}|_)*
 symbol			";"|","|"("|")"|"{"|"}"|">"|"<"|"*"|"="|"+"|"/"|"-"
@@ -39,5 +38,5 @@ symbol			";"|","|"("|")"|"{"|"}"|">"|"<"|"*"|"="|"+"|"/"|"-"
 {number}		{ return token::Integer; }
 {id}			{ return token::Identifier; }
 {symbol}		{ return *YYText(); }
-.				{}
+.				{ driver.error("invalid character"); }
 %%

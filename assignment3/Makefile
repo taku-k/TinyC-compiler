@@ -9,7 +9,7 @@ CXXSTD = -std=c++11
 CXXFLAGS = -Wno-deprecated-register -O0  $(CXXDEBUG) $(CXXSTD)
 
 
-CPPOBJ = main tc_driver
+CPPOBJ = tcc tc_driver
 SOBJ =  parser scanner
 
 FILES = $(addsuffix .cpp, $(CPPOBJ))
