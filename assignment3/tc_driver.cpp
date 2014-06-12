@@ -5,9 +5,9 @@
 
 TC::TC_Driver::~TC_Driver(){
 	delete(scanner);
-	scanner = nullptr;
+	scanner = NULL;
 	delete(parser);
-	parser = nullptr;
+	parser = NULL;
 }
 
 void TC::TC_Driver::parse() {
