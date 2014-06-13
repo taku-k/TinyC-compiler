@@ -1,6 +1,8 @@
 #include "ast.hpp"
 
-// NodeList methods
+//
+//                  NodeList methods
+//
 NodeList::~NodeList(void) {
 	//std::for_each(list.begin(), list.end(), delete_object());
 }
@@ -24,116 +26,38 @@ void NodeList::Debug(void) {
   }
   std::cout << "------Debug end------" << std::endl;
 }
-// NodeList end
+//
+//                    NodeList end
+//
 
 
 
-// Nnode methods 
-Nnode::Nnode() : op_(0), name_(""), value_(0), node_() {}
+//
+//                   Node methods
+//
+Node::Node() : op_(0), name_(""), value_(0), node_() {}
 
-
-// Nnode::Nnode(const int op, std::string str) {
-// 	op_ = op;
-// 	name_ = str;
-// 	value_ = 0;
-// 	for (int i = 0; i < Nnode::N; i++) {
-// 		node_[i] = NULL;
-// 	}
-// }
-
-// Nnode::Nnode(const int op, int val) {
-// 	op_ = op;
-// 	name_ = "";
-// 	value_ = val;
-// 	for (int i = 0; i < Nnode::N; i++) {
-// 		node_[i] = NULL;
-// 	}
-// }
-
-// Nnode::Nnode(const int op, Nnode *a) {
-// 	op_ = op;
-// 	name_ = "";
-// 	value_ = 0;
-// 	node_[0] = a;
-//   node_[1] = NULL;
-//   node_[2] = NULL;
-//   node_[3] = NULL;
-// }
-
-// Nnode::Nnode(const int op, Nnode *a, Nnode *b) {
-//   op_ = op;
-//   name_ = "";
-//   value_ = 0;
-//   node_[0] = a;
-//   node_[1] = b;
-//   node_[2] = NULL;
-//   node_[3] = NULL;
-// }
-
-// Nnode::Nnode(const int op, Nnode *a, Nnode *b, Nnode *c) {
-//   op_ = op;
-//   name_ = "";
-//   value_ = 0;
-//   node_[0] = a;
-//   node_[1] = b;
-//   node_[2] = c;
-//   node_[3] = NULL;
-// }
-
-// Nnode::Nnode(const int op, Nnode *a, Nnode *b, Nnode *c, Nnode *d) {
-//   op_ = op;
-//   name_ = "";
-//   value_ = 0;
-//   node_[0] = a;
-//   node_[1] = b;
-//   node_[2] = c;
-//   node_[3] = d;
-// }
-
-// Nnode* Nnode::MakeNode(const int op, std::string str, int val, Nnode *a /* NULL */,
-//         Nnode *b /* NULL */, Nnode *c /* NULL */, Nnode *d /* NULL */) {
-//   if (d != NULL) {
-//     return new Nnode(op, a, b, c, d);
-//   } else if (c != NULL) {
-//     return new Nnode(op, a, b, c);
-//   } else if (b != NULL) {
-//     return new Nnode(op, a, b);
-//   } else if (a != NULL) {
-//     return new Nnode(op, a);
-//   } else if (val == 0) {
-//     return new Nnode(op, str);
-//   } else if (str == "") {
-//     return new Nnode(op, val);
-//   } else {
-//     /*
-//      * error
-//      */
-
-//   }
-//   return NULL;
-// }
-
-
-int Nnode::getop(void) {
+int Node::getop(void) {
   return op_;
 }
 
-int Nnode::getvalue(void) {
+int Node::getvalue(void) {
   return value_;
 }
 
-std::string Nnode::getname(void) {
+std::string Node::getname(void) {
   return name_;
 }
 
-Nnode *Nnode::getnode(int num) {
+Node *Node::getnode(int num) {
   if (num >=0 && num < N) {
     return node_[num];
   }
   return NULL;
 }
-// Nnode end
-
+//
+//                       Node end
+//
 
 
 
@@ -157,7 +81,7 @@ void IdentifierNode::PrintNode(void) {
 /*
  * IntegerNode
  */
-IntegerNode::IntegerNode(int val) : Nnode() {
+IntegerNode::IntegerNode(int val) : Node() {
   value_ = val;
 }
 
@@ -173,67 +97,29 @@ void IntegerNode::PrintNode(void) {
 /* 
  * DeclTypeNode
  */
-DeclTypeNode::DeclTypeNode(const int op, Nnode* node) {
+DeclTypeNode::DeclTypeNode(const int op, List* list) {
   op_ = op;
-  node_[0] = node;
+  list_ = list;
 }
 
 void DeclTypeNode::PrintNode(void) {
-  node_[0]->PrintNode();
+  list_->PrintList(op_);
 }
 /*
  * DeclTypeNode END
  */
 
 
-/* DeclList
- * 
- */
-DeclList::DeclList(const int op, Nnode* list) {
-  op_ = op;
-  node_[1] = list;
-}
-
-DeclList::DeclList(const int op, Nnode* node, Nnode* list) {
-  op_ = op;
-  node_[0] = node;
-  node_[1] = list;
-}
-
-DeclList::DeclList(Nnode* node, Nnode* list) {
-  node_[0] = node;
-  node_[1] = list;
-}
-
-
-void DeclList::PrintNode(void) {
-  // if (node_[1] != NULL && node_[0] != NULL) {
-  //   node_[0]->PrintDecl(op_);
-  //   node_[1]->PrintNode();
-  // } else if (node_[0] != NULL) {
-  //   node_[0]->PrintDecl(op_);
-  // } else if (node_[0] == NULL) {
-  //   node_[1]->PrintNode();
-  // }
-  if (node_[1] != NULL) {
-    node_[1]->PrintNode();
-  }
-  if (node_[0] != NULL) {
-    node_[0]->PrintNode(op_);
-  }
-}
-/*
- * END
- */
 
 /* 
  * DeclNode
  */
-DeclNode::DeclNode(std::string *id, TC::TC_Driver *d) {
-  d->AddId(name_);
+DeclNode::DeclNode(Node *id, TC::TC_Driver *d) {
+  node_[0] = id;
+  std::cout << (d->getTokenDriver())->get_level() << std::endl;
 }
 
-DeclNode::DeclNode(Nnode *node) {
+DeclNode::DeclNode(Node *node) {
   node_[0] = node;
 }
 
@@ -262,12 +148,12 @@ void DeclNode::PrintNode(void) {
  * FuncNode 
  * 関数ノード
  */
-FuncNode::FuncNode(Nnode* ret, Nnode* id, 
-                    Nnode* paramlist, Nnode* stat) {
+FuncNode::FuncNode(Node* ret, Node* id, 
+                    List* list, Node* stat) {
   op_ = OP::FUNC;
   node_[0] = ret;
   node_[1] = id;
-  node_[2] = paramlist;
+  list_ = list;
   node_[3] = stat;
 }
 
@@ -277,7 +163,7 @@ void FuncNode::PrintNode(void) {
   std::cout << " ";
   PrintNum(1);
   std::cout << ") (";
-  PrintNum(2);
+  list_->PrintList();
   std::cout << ")\n";
   PrintNum(3);
 }
@@ -304,27 +190,12 @@ void RetNode::PrintNode(void) {
  */
 
 
-/* ParamDeclList
- * 
- */
-ParamDeclList::ParamDeclList(Nnode* node, Nnode* list) {
-  node_[0] = node;
-  node_[1] = list;
-}
-
-void ParamDeclList::PrintNode(void) {
-  PrintNum(1);
-  PrintNum(0);
-}
-/*
- * ParamDeclList END
- */
 
 
 /*
  * ParamDeclNode
  */
-ParamDeclNode::ParamDeclNode(const int op, Nnode* node) {
+ParamDeclNode::ParamDeclNode(const int op, Node* node) {
   op_ = op;
   node_[0] = node;
 }
@@ -341,65 +212,31 @@ void ParamDeclNode::PrintNode(void) {
 /*
  * ComStatNode { (first)int a,b; | (second)if(a>b)...}
  */
-ComStatNode::ComStatNode(Nnode* first, Nnode* second) {
-  node_[0] = first;
-  node_[1] = second;
+
+ComStatNode::ComStatNode(List* list1, List* list2) {
+  list_[0] = list1;
+  list_[1] = list2;
 }
 
 void ComStatNode::PrintNode(void) {
   std::cout << "{" << std::endl;
   // declartion
-  PrintNum(1);
+  list_[0]->PrintList();
   // statement
-  PrintNum(0);
-  std::cout << "\n}";
+  list_[1]->PrintList();
+  std::cout << "}";
 }
 /*
  * ComStatNode END
  */
 
 
-/*
- * DeclarationList
- * node_[0] = DeclTypeNode, node_[1] = DeclarationList
- */
-DeclarationList::DeclarationList(Nnode* node, Nnode* list) {
-  node_[0] = node;
-  node_[1] = list;
-}
-
-// void DeclarationList::PrintNode(void) {
-//   node_[0]->PrintNode();
-//   if(node_[1] != NULL) {
-//     node_[1]->PrintNode();
-//   }
-// }
-/*
- * DeclarationNode END
- */
-
-
-/*
- * StatList
- */
-StatList::StatList(Nnode* node, Nnode* list) {
-  node_[0] = node;
-  node_[1] = list;
-}
-
-void StatList::PrintNode(void) {
-  PrintNum(1);
-  PrintNum(0);
-}
-/*
- * StatList END
- */
 
 /*
  * StatNode
  * node_[0] = 
  */
-StatNode::StatNode(Nnode* node) {
+StatNode::StatNode(Node* node) {
   node_[0] = node;
 }
 
@@ -416,7 +253,7 @@ void StatNode::PrintNode(void) {
  * ExpressionList
  * node_[0] = AssignExprNode, node_[1] = ExpressionList
  */
-ExpressionList::ExpressionList(Nnode* node, Nnode* list) {
+ExpressionList::ExpressionList(Node* node, Node* list) {
   node_[0] = node;
   node_[1] = list;
 }
@@ -437,12 +274,12 @@ void ExpressionList::PrintNode(void) {
 /*
  * IFStatNode
  */
-IFStatNode::IFStatNode(Nnode* expr, Nnode* stat) {
+IFStatNode::IFStatNode(Node* expr, Node* stat) {
   node_[0] = expr;
   node_[1] = stat;
 }
 
-IFStatNode::IFStatNode(Nnode* expr, Nnode* stat, Nnode* elsestat) {
+IFStatNode::IFStatNode(Node* expr, Node* stat, Node* elsestat) {
   node_[0] = expr;
   node_[1] = stat;
   node_[2] = elsestat;
@@ -466,7 +303,7 @@ void IFStatNode::PrintNode(void) {
 /*
  * WHILEStatNode
  */
-WHILEStatNode::WHILEStatNode(Nnode* expr, Nnode* stat) {
+WHILEStatNode::WHILEStatNode(Node* expr, Node* stat) {
   node_[0] = expr;
   node_[1] = stat;
 }
@@ -486,7 +323,7 @@ void WHILEStatNode::PrintNode(void) {
 /*
  * RETURNStatNode
  */
-RETURNStatNode::RETURNStatNode(Nnode* expr) {
+RETURNStatNode::RETURNStatNode(Node* expr) {
   node_[0] = expr;
 }
 
@@ -503,11 +340,11 @@ void RETURNStatNode::PrintNode(void) {
 /*
  * AssignExprNode 
  */
-AssignExprNode::AssignExprNode(Nnode *node) {
+AssignExprNode::AssignExprNode(Node *node) {
   node_[1] = node;
 }
 
-AssignExprNode::AssignExprNode(Nnode *id, Nnode* node) {
+AssignExprNode::AssignExprNode(Node *id, Node* node) {
   node_[0] = id;
   node_[1] = node;
 }
@@ -540,7 +377,7 @@ void AssignExprNode::PrintNode(void) {
 /*
  * ExprNode
  */
-ExprNode::ExprNode(const int op, Nnode *n1, Nnode *n2) {
+ExprNode::ExprNode(const int op, Node *n1, Node *n2) {
   op_ = op;
   node_[0] = n1;
   node_[1] = n2;
@@ -553,6 +390,12 @@ void ExprNode::PrintNode(void) {
       break;
     case(OP::AND):
       std::cout << "(&& ";
+      break;
+    case(OP::GREATEREQUAL):
+      std::cout << "(>= ";
+      break;
+    case(OP::LESSEQUAL):
+      std::cout << "(<= ";
       break;
     case(OP::EQUAL):
       std::cout << "(== ";
@@ -591,7 +434,7 @@ void ExprNode::PrintNode(void) {
 /*
  * UnaryNode
  */
-UnaryNode::UnaryNode(const int op, Nnode *node) : Nnode() {
+UnaryNode::UnaryNode(const int op, Node *node) : Node() {
   op_ = op;
   node_[0] = node;
 }
@@ -612,16 +455,16 @@ void UnaryNode::PrintNode(void) {
 /*
  * FuncCallNode
  */
-FuncCallNode::FuncCallNode(Nnode *id, Nnode *args) : Nnode() {
+FuncCallNode::FuncCallNode(Node *id, List *args) : Node() {
   node_[0] = id;
-  node_[1] = args;
+  list_ = args;
 }
 
 void FuncCallNode::PrintNode(void) {
   std::cout << "(FCALL ";
   PrintNum(0);
   std::cout << " ";
-  PrintNum(1);
+  list_->PrintList();
   std::cout << ")";
 }
 /*
@@ -629,18 +472,19 @@ void FuncCallNode::PrintNode(void) {
  */
 
 
-/*
- * FuncArgsNode
- */
-FuncArgsNode::FuncArgsNode(Nnode *node, Nnode *list) : Nnode() {
-  node_[0] = node;
-  node_[1] = list;
+void DeclList::PrintList(int op) {
+  op_ = op;
+  for (int i = 0; i < elems.size(); i++) {
+    if (elems[i] != NULL) {
+      elems[i]->PrintNode(op);
+    }
+  }
 }
 
-void FuncArgsNode::PrintNode(void) {
-  PrintNum(1);
-  if (node_[0] != NULL) {
-    PrintNum(0);
+
+void FuncArgsList::PrintList() {
+  for (int i = 0; i < elems.size(); i++) {
+    elems[i]->PrintNode();
     std::cout << " ";
   }
 }

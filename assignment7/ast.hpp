@@ -1,5 +1,5 @@
-#ifndef __NODE_HPP__
-#define __NODE_HPP__ 1
+#ifndef __AST_HPP__
+#define __AST_HPP__
 
 #include <iostream>
 #include <vector>
@@ -7,11 +7,13 @@
 #include <map>
 #include <algorithm>
 #include <string.h>
+#include <deque>
 
 #include "tc_driver.hpp"
 
 class NodeList;
-class Nnode;
+class Node;
+class List;
 
 namespace OP{
   enum {
@@ -20,58 +22,60 @@ namespace OP{
   };
 }
 
+
+
 // ノードのリスト
 // 最も外部のノードを保持しておく
 class NodeList{
 public:
-	NodeList() {}
-	~NodeList(void);
+  NodeList() {}
+  ~NodeList(void);
 
-	void add(Nnode *node) {
-		list.push_back(node);
-	}
+  void add(Node *node) {
+    list.push_back(node);
+  }
 
-	void PrintTree(void);
+  void PrintTree(void);
 
   // debug 
   void Debug(void);
 
 private:
-	std::vector<Nnode*> list;
+  std::vector<Node*> list;
   // struct delete_object {
-  //   void operator()(Nnode *ptr){ delete ptr; }
+  //   void operator()(Node *ptr){ delete ptr; }
   // } ;
 };
 
 
 
+// 
+//            基底クラスの宣言
+//              List, Node
+//
+
 // ノード
-class Nnode{
+class Node{
 public:
 
   static const int N = 4;
 
   // constructor
-  Nnode();
-  // Nnode(const int op, std::string str);
-  // Nnode(const int op, int val);
-  // Nnode(const int op, Nnode *a);
-  // Nnode(const int op, Nnode *a, Nnode *b);
-  // Nnode(const int op, Nnode *a, Nnode *b, Nnode *c);
-  // Nnode(const int op, Nnode *a, Nnode *b, Nnode *c, Nnode *d);
+  Node();
+  // Node(List*, Node*);
 
   // deconstructor
-  virtual ~Nnode(void) {
+  virtual ~Node(void) {
     delete node_[0];
     delete node_[1];
     delete node_[2];
     delete node_[3];
   }
 
-	int getop(void);
-	int getvalue(void);
-	std::string getname(void);
-	Nnode *getnode(int num);
+  int getop(void);
+  int getvalue(void);
+  std::string getname(void);
+  Node *getnode(int num);
 
   virtual void PrintNode(void) {}
   virtual void PrintNode(int) {}
@@ -81,37 +85,64 @@ public:
       node_[i]->PrintNode();
     }
   }
-  // virtual void PrintDecl(int) {}
-  // virtual void PrintDecl(void) {}
 
-  // static Nnode* MakeNode(const int op, std::string str="", int val=0,
- //          Nnode *a=NULL, Nnode *b=NULL, Nnode *c=NULL, Nnode *d=NULL);
-  // static Nnode* MakeStat();
-  // static Nnode* MakeFuncDecl();
-  // static Nnode* MakeIfStat();
-  // static Nnode* MakeWhileStat();
-  // static Nnode* MakeElseStat();
-  // static Nnode* MakeRetStat();
-  // static Nnode* MakeIntDeclList();
-  // static Nnode* MakeIntDecl();
+  inline void debuglevel(){
+  }
 
 protected:
-	int op_;
-	std::string name_;
-	int value_;
-	Nnode *node_[N];
+  int op_;
+  std::string name_;
+  int value_;
+  Node *node_[N];
 };
 
 
+// リスト
+class List {
+public:
+  List() {}
+  virtual ~List(){};
 
-class IdentifierNode : public Nnode {
+  void append(Node *node) {
+    elems.push_back(node);
+  }
+
+  virtual void PrintList(void) {
+    for (int i = 0; i < elems.size(); i++) {
+      if (elems[i] != NULL) {
+        elems[i]->PrintNode();
+      }
+    }
+  }
+  virtual void PrintList(int){};
+
+protected:
+  std::deque<Node *> elems;
+  int op_;
+};
+
+//
+//                基底クラスここまで
+//
+//
+
+
+
+//
+//
+//            Node から 継承
+//
+//
+
+
+class IdentifierNode : public Node {
 public:
   IdentifierNode(std::string *id);
   void PrintNode(void);
 private:
 };
 
-class IntegerNode : public Nnode {
+class IntegerNode : public Node {
 public:
   IntegerNode(int val);
   void PrintNode(void);
@@ -119,46 +150,43 @@ private:
 };
 
 
-class DeclTypeNode : public Nnode {
+class DeclTypeNode : public Node {
 public:
-  DeclTypeNode(const int op, Nnode* node);
+  DeclTypeNode(const int op, List* list);
   void PrintNode(void);
 private:
+  List *list_;
 };
 
-
-class DeclList : public Nnode {
+//
+//    宣言
+//    意味情報を持つ
+class DeclNode : public Node {
 public:
-  // node_[0] には　nodeがつまりはIdが入る
-  // node_[1] には後ろに続くリストが入る
-  // node_[0] = DeclNode, node_[1] = DeclList
-  DeclList(const int op, Nnode* list);
-  DeclList(const int op, Nnode* node, Nnode* list);
-  DeclList(Nnode* node, Nnode* list);
-  void PrintNode(void);
-private:
-};
-
-class DeclNode : public Nnode {
-public:
-  DeclNode(Nnode *node);
-  DeclNode(std::string *id, TC::TC_Driver *d);
+  DeclNode(Node *node);
+  DeclNode(Node *id, TC::TC_Driver *d);
   void PrintNode(const int op);
   // ParamDeclNodeとの連携で"int"をどのタイミングで表示する？
   void PrintNode(void);
 private:
-};
 
-class FuncNode : public Nnode {
+};
+//
+//
+
+
+// 意味解析情報保有
+class FuncNode : public Node {
 public:
   // node_[0] = RetNode, node_[1] = DeclNode, node_[2] = ParamDeclList
   // node_[3] = ComStatNode
-  FuncNode(Nnode* ret, Nnode* id, Nnode* paramlist, Nnode* stat);
+  FuncNode(Node* ret, Node* id, List* list, Node* stat);
   void PrintNode(void);
 private:
+  List *list_;
 };
 
-class RetNode : public Nnode {
+class RetNode : public Node {
 public:
   RetNode(const int op);
   void PrintNode(void);
@@ -166,129 +194,139 @@ private:
 };
 
 
-class ParamDeclList : public Nnode {
-public:
-  // node_[0] = ParamDeclNode, node_[1] = ParamDeclList
-  ParamDeclList(Nnode* node, Nnode* list);
-  void PrintNode(void);
-private:
-};
-
-class ParamDeclNode : public Nnode {
+class ParamDeclNode : public Node {
 public:
   // node_[0] = DeclNode
-  ParamDeclNode(const int op, Nnode* node);
+  ParamDeclNode(const int op, Node* node);
   void PrintNode(void);
 private:
 };
 
 // compound_statement(bison)
-class ComStatNode : public Nnode {
+class ComStatNode : public Node {
 public:
   // node_[0] = DeclList, node_[1] = StatList
-  ComStatNode(Nnode* first, Nnode* second);
+  // ComStatNode(Node* first, Node* second);
+  ComStatNode(List *list1, List* list2);
   void PrintNode(void);
 private:
+  List *list_[2];
 };
 
-class DeclarationList : public Nnode {
-public:
-  // node_[0] = DeclTypeNode, node_[1] = DeclarationList
-  DeclarationList(Nnode* node, Nnode* list);
-private:
-};
-
-class StatList : public Nnode {
-public:
-  // node_[0] = StatNode or IFStatNode or WHILEStatNode or 
-  // node_[1] = StatList
-  StatList(Nnode* node, Nnode* list);
-  void PrintNode(void);
-private:
-};
 
 // statement(bison)
-class StatNode : public Nnode {
+class StatNode : public Node {
 public:
   // node_[0] = 
-  StatNode(Nnode* node);
+  StatNode(Node* node);
   void PrintNode(void);
 private:
 };
 
 // expression(bison)
-class ExpressionList : public Nnode {
+class ExpressionList : public Node {
 public:
   // node_[0] = AssignExprNode, node_[1] = ExpressionList
-  ExpressionList(Nnode* node, Nnode* list);
+  ExpressionList(Node* node, Node* list);
   void PrintNode(void);
 private:
 };
 
-class IFStatNode : public Nnode {
+class IFStatNode : public Node {
 public:
   // node_[0] = ExpressionList, node_[1] = StatNode etc
-  IFStatNode(Nnode* expr, Nnode* stat);
-  IFStatNode(Nnode* expr, Nnode* stat, Nnode* elsestat);
+  IFStatNode(Node* expr, Node* stat);
+  IFStatNode(Node* expr, Node* stat, Node* elsestat);
   void PrintNode(void);
 private:
 };
 
-class WHILEStatNode : public Nnode {
+class WHILEStatNode : public Node {
 public:
   // node_[0] = ExpressionList, node_[1] = StatNode etc
-  WHILEStatNode(Nnode* expr, Nnode* stat);
+  WHILEStatNode(Node* expr, Node* stat);
   void PrintNode(void);
 private:
 };
 
-class RETURNStatNode : public Nnode {
+class RETURNStatNode : public Node {
 public:
   // node_[0] = ExpressionList
-  RETURNStatNode(Nnode* expr);
+  RETURNStatNode(Node* expr);
   void PrintNode(void);
 private:
 };
 
 
-class AssignExprNode : public Nnode {
+class AssignExprNode : public Node {
 public:
-  AssignExprNode(Nnode *node);
-  AssignExprNode(Nnode *id, Nnode* node);
+  AssignExprNode(Node *node);
+  AssignExprNode(Node *id, Node* node);
   void PrintNode(void);
 private:
 };
 
 // このクラスはlogical, equalty, relational, alithimeticを管理する
-class ExprNode : public Nnode {
+class ExprNode : public Node {
 public:
-  ExprNode(const int op, Nnode *n1, Nnode *n2);
+  ExprNode(const int op, Node *n1, Node *n2);
   void PrintNode(void);
 private:
 };
 
-class UnaryNode : public Nnode {
+class UnaryNode : public Node {
 public:
   // node_[0] = 
-  UnaryNode(const int op, Nnode *node);
+  UnaryNode(const int op, Node *node);
   void PrintNode(void);
 private:
 };
 
-class FuncCallNode : public Nnode {
+// 意味解析情報保有
+class FuncCallNode : public Node {
 public:
-  FuncCallNode(Nnode *id, Nnode *args);
+  FuncCallNode(Node *id, List *args);
   void PrintNode(void);
 private:
+  List *list_;
 };
 
-class FuncArgsNode : public Nnode {
+
+// 
+//
+//            List から 継承
+//
+//
+
+class DeclList : public List {
 public:
-  FuncArgsNode(Nnode *node, Nnode *list);
-  void PrintNode(void);
+  DeclList() {}
+  void PrintList(int op);
+};
+
+class ParamDeclList : public List {
+public:
+  ParamDeclList() {}
 private:
 };
 
+class DeclarationList : public List {
+public:
+  DeclarationList() {}
+private:
+};
 
+class StatList : public List {
+public:
+  StatList() {}
+private:
+};
+
+class FuncArgsList : public List {
+public:
+  FuncArgsList() {}
+  void PrintList();
+private:
+};
 
 #endif

@@ -2,7 +2,7 @@
 
 int main(void) {
   NodeList nl;
-  Nnode *node;
+  Node *node;
   node = Nnode::MakeNode(6, "avbd");
   nl.add(node);
   nl.Debug();
