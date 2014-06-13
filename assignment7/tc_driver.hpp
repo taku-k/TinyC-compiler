@@ -7,6 +7,7 @@
 #include "tc_parser.tab.hh"
 #include "tc_scanner.hpp"
 #include "ast.hpp"
+#include "token.hpp"
 
 namespace TC{
 
@@ -41,42 +42,7 @@ private:
 
 
 
-class TkInfo {
-public:
-  TkInfo(int op, int lev, int offset) :
-        op_(op), lev_(lev), kind_(), offset_(offset) {};
-private:
-  int op_;
-  int lev_;
-  enum {FRESH, VAR, FUN, PARM, UNDEFFUN} kind_;
-  int offset_;
-};
 
-
-
-
-class Token_Driver {
-public:
-
-  Token_Driver();
-  ~Token_Driver();
-
-  void Push(TkInfo *ti);
-  TkInfo* Pop();
-
-  void level_up(){level_++;}
-  void level_down(){level_--;}
-  int get_level(){return level_;}
-
-  void add_id(std::string id);
-
-  void debug();
-
-private:
-  std::deque<TkInfo *> t_stack;
-  int level_;
-  std::vector<std::string> idtable;
-};
 
 }
 

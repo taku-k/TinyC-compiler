@@ -1,12 +1,13 @@
 int a,b,c;
 int f(int a, int b, int c){
 	b = a && 2 || 2;
-  a = a || a || a, a=3;
-  a < a;
-  d = 12;
-  a = -a;
+	a = a || a || a, a=3;
+	a < a;
+	d = 12;
+	a = -a;
 	if (a)a;else if(b) d; else e;
 	while(a){}
-  f(a-2,54,6);
+	f(a-2,54,6);
+	f();
   return a;
 }

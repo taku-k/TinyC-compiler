@@ -15,7 +15,7 @@ int main(const int argc, const char **argv)
 
   driver.print();
 
-  // driver.debug();
+  (driver.getTokenDriver())->debug();
 
   return 0;
 }

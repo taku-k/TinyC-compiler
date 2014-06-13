@@ -70,29 +70,4 @@ void TC::TC_Driver::print() {
 
 
 
-// Token_Driver
-//
-TC::Token_Driver::Token_Driver() {}
-
-TC::Token_Driver::~Token_Driver() {}
-
-void TC::Token_Driver::Push(TkInfo *ti) {
-	t_stack.push_front(ti);
-}
-
-TC::TkInfo* TC::Token_Driver::Pop() {
-	TC::TkInfo *ret = t_stack.front();
-	t_stack.pop_front();
-	return ret;
-}
-
-void TC::Token_Driver::add_id(std::string id) {
-  idtable.push_back(id);
-}
-
-void TC::Token_Driver::debug() {
-  for (int i = 0; i < idtable.size(); i++) {
-    std::cout << idtable[i] << std::endl;
-  }
-}
 

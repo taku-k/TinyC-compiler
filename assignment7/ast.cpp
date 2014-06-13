@@ -14,7 +14,7 @@ void NodeList::PrintTree(void) {
     list[i]->PrintNode();
     std::cout << ")\n";
   }
-  std::cout << "\n---end---" << std::endl;
+  std::cout << "---end---" << std::endl;
 }
 
 void NodeList::Debug(void) {
@@ -65,9 +65,11 @@ Node *Node::getnode(int num) {
 /* IdentifierNode
  * 識別子ノード
  */
-IdentifierNode::IdentifierNode(std::string *id) {
+IdentifierNode::IdentifierNode(std::string *id, TC::TC_Driver *d) {
   op_ = OP::ID;
   name_ = *id;
+  tkinfo_ = new TC::TkInfo((d->getTokenDriver())->get_level(), name_);
+  (d->getTokenDriver())->Push(tkinfo_);
 }
 
 void IdentifierNode::PrintNode(void) {
@@ -102,6 +104,12 @@ DeclTypeNode::DeclTypeNode(const int op, List* list) {
   list_ = list;
 }
 
+DeclTypeNode::DeclTypeNode(const int op, List* list, TC::TC_Driver *d) {
+  op_ = op;
+  list_ = list;
+  // std::cout << (d->getTokenDriver())->get_level() << std::endl;
+}
+
 void DeclTypeNode::PrintNode(void) {
   list_->PrintList(op_);
 }
@@ -111,37 +119,38 @@ void DeclTypeNode::PrintNode(void) {
 
 
 
-/* 
- * DeclNode
- */
-DeclNode::DeclNode(Node *id, TC::TC_Driver *d) {
-  node_[0] = id;
-  std::cout << (d->getTokenDriver())->get_level() << std::endl;
-}
+// /* 
+//  * DeclNode
+//  */
+// // この時にTokenInfoを作成する。
+// DeclNode::DeclNode(Node *id, TC::TC_Driver *d) {
+//   node_[0] = id;
+//   //std::cout << (d->getTokenDriver())->get_level() << std::endl;
+// }
 
-DeclNode::DeclNode(Node *node) {
-  node_[0] = node;
-}
+// DeclNode::DeclNode(Node *node) {
+//   node_[0] = node;
+// }
 
 
-void DeclNode::PrintNode(const int op) {
-  switch(op){
-    case(OP::INT):
-      std::cout << "(int ";
-  }
-  PrintNum(0);
-  std::cout << ") ";
-}
+// void DeclNode::PrintNode(const int op) {
+//   switch(op){
+//     case(OP::INT):
+//       std::cout << "(int ";
+//   }
+//   PrintNum(0);
+//   std::cout << ") ";
+// }
 
-void DeclNode::PrintNode(void) {
-  if (node_[0] != NULL) {
-    node_[0]->PrintNode();
-  }
-  std::cout << " ";
-}
-/*
- * END
- */
+// void DeclNode::PrintNode(void) {
+//   if (node_[0] != NULL) {
+//     node_[0]->PrintNode();
+//   }
+//   std::cout << " ";
+// }
+// /*
+//  * END
+//  */
 
 
  /*
@@ -202,7 +211,12 @@ ParamDeclNode::ParamDeclNode(const int op, Node* node) {
 
 void ParamDeclNode::PrintNode(void) {
   // DeclNodeでintも表示してもらう
-  node_[0]->PrintNode(op_);
+  switch(op_){
+    case(OP::INT):
+      std::cout << "(int ";
+  }
+  PrintNum(0);
+  std::cout << ")";
 }
 /*
  * ParamDeclNode END
@@ -472,11 +486,19 @@ void FuncCallNode::PrintNode(void) {
  */
 
 
+
+
+
 void DeclList::PrintList(int op) {
   op_ = op;
   for (int i = 0; i < elems.size(); i++) {
     if (elems[i] != NULL) {
-      elems[i]->PrintNode(op);
+      switch(op_){
+        case(OP::INT):
+          std::cout << "(int ";
+      }
+      elems[i]->PrintNode();
+      std::cout << ")";
     }
   }
 }

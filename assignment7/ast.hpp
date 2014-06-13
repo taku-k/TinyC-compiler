@@ -10,10 +10,12 @@
 #include <deque>
 
 #include "tc_driver.hpp"
+#include "token.hpp"
 
 class NodeList;
 class Node;
 class List;
+class TkInfo;
 
 namespace OP{
   enum {
@@ -21,6 +23,7 @@ namespace OP{
      GREATEREQUAL, LESS, GREATER, ADD, SUB, MUL, DIV, MINUS
   };
 }
+
 
 
 
@@ -42,9 +45,6 @@ public:
 
 private:
   std::vector<Node*> list;
-  // struct delete_object {
-  //   void operator()(Node *ptr){ delete ptr; }
-  // } ;
 };
 
 
@@ -137,9 +137,10 @@ protected:
 
 class IdentifierNode : public Node {
 public:
-  IdentifierNode(std::string *id);
+  IdentifierNode(std::string *id, TC::TC_Driver *d);
   void PrintNode(void);
 private:
+  TC::TkInfo *tkinfo_;
 };
 
 class IntegerNode : public Node {
@@ -153,26 +154,27 @@ private:
 class DeclTypeNode : public Node {
 public:
   DeclTypeNode(const int op, List* list);
+  DeclTypeNode(const int op, List* list, TC::TC_Driver *d);
   void PrintNode(void);
 private:
   List *list_;
 };
 
-//
-//    宣言
-//    意味情報を持つ
-class DeclNode : public Node {
-public:
-  DeclNode(Node *node);
-  DeclNode(Node *id, TC::TC_Driver *d);
-  void PrintNode(const int op);
-  // ParamDeclNodeとの連携で"int"をどのタイミングで表示する？
-  void PrintNode(void);
-private:
-
-};
-//
-//
+// //
+// //    宣言
+// //    意味情報を持つ
+// class DeclNode : public Node {
+// public:
+//   DeclNode(Node *node);
+//   DeclNode(Node *id, TC::TC_Driver *d);
+//   void PrintNode(const int op);
+//   // ParamDeclNodeとの連携で"int"をどのタイミングで表示する？
+//   void PrintNode(void);
+// private:
+//   TkInfo *tkinfo_;
+// };
+// //
+// //
 
 
 // 意味解析情報保有
@@ -185,6 +187,8 @@ public:
 private:
   List *list_;
 };
+
+
 
 class RetNode : public Node {
 public:

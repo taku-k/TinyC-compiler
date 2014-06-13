@@ -98,23 +98,21 @@ external_declaration        : declaration                               { $$ = $
 
 
 
-declaration                 : T_Int declarator_list ';'                 { $$ = new DeclTypeNode(OP::INT, $2); }
+declaration                 : T_Int declarator_list ';'                 { $$ = new DeclTypeNode(OP::INT, $2, &driver); }
                             ;
 
 declarator_list             : declarator                                { ($$ = new DeclList())->append($1); }
                             | declarator_list ',' declarator            { ($$ = $1)->append($3); }
                             ;
 
-declarator                  : Identifier                                { $$ = new DeclNode(new IdentifierNode($1), &driver); }
+declarator                  : Identifier                                { $$ = new IdentifierNode($1, &driver); }
                             ;
 
 
 
 
-
-
-function_definition         : T_Int declarator subroutien '(' ')' compound_statement                        { 
-                                                                                                              $$ = new FuncNode(new RetNode(OP::INT), $2, NULL, $6); 
+function_definition         : T_Int declarator subroutien '(' ')' compound_statement                        {
+                                                                                                              $$ = new FuncNode(new RetNode(OP::INT), $2, new ParamDeclList(), $6); 
                                                                                                               (driver.getTokenDriver())->level_down();
                                                                                                             }
                             | T_Int declarator subroutien '(' parameter_type_list ')' compound_statement    {
@@ -173,7 +171,7 @@ expression                  : assign_expr                                 { $$ =
                             ;
 
 assign_expr                 : logical_OR_expr                             { $$ = new AssignExprNode($1); }
-                            | Identifier '=' assign_expr                  { $$ = new AssignExprNode(new IdentifierNode($1), $3); }
+                            | Identifier '=' assign_expr                  { $$ = new AssignExprNode(new IdentifierNode($1, &driver), $3); }
                             ;
 
 logical_OR_expr             : logical_AND_expr                            { $$ = $1; }
@@ -211,11 +209,11 @@ unary_expr                  : postfix_expr                                { $$ =
                             ;
 
 postfix_expr                : primary_expr                                { $$ = $1; }
-                            | Identifier '(' argument_expression_list ')' { $$ = new FuncCallNode(new IdentifierNode($1), $3); }
-                            | Identifier '(' ')'                          { $$ = new FuncCallNode(new IdentifierNode($1), NULL);}
+                            | Identifier '(' argument_expression_list ')' { $$ = new FuncCallNode(new IdentifierNode($1, &driver), $3); }
+                            | Identifier '(' ')'                          { $$ = new FuncCallNode(new IdentifierNode($1, &driver), new FuncArgsList());}
                             ;
 
-primary_expr                : Identifier                                  { $$ = new IdentifierNode($1); }
+primary_expr                : Identifier                                  { $$ = new IdentifierNode($1, &driver); }
                             | constant                                    { $$ = $1; }
                             | '(' expression ')'                          { $$ = $2; }
                             ;
