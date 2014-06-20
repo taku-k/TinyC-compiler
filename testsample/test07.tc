@@ -1,7 +1,7 @@
 int x;
 int f(int x, int y)
 {
-  int x;
+  int x,z;
   {
     int x, y;
     x+y;
@@ -12,7 +12,7 @@ int f(int x, int y)
   }
   {
     int w;
-    x+y+w;
+    x+y+w+z;
   }
   x+y;
   g();

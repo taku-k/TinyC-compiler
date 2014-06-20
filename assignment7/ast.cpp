@@ -342,12 +342,15 @@ ParamDeclNode::ParamDeclNode(const int op, Node* node) {
 }
 
 void ParamDeclNode::PrintNode(std::ostream &os) {
-  // DeclNodeでintも表示してもらう
+  IdentifierNode *it = (IdentifierNode *)node_[0];
   switch(op_){
     case(OP::INT):
       os << "(int ";
   }
   PrintNum(0, os);
+  if (it->get_token_info()->get_offset() != -1) {
+    os << ":" << it->get_token_info()->get_offset();
+  }
   os << ")";
 }
 /*
@@ -678,13 +681,22 @@ void DeclList::append(Node *node) {
 
 void DeclList::PrintList(int op, std::ostream &os) {
   op_ = op;
+
+  // IdentifierNodeを回して表示する
   for (int i = 0; i < elems.size(); i++) {
-    if (elems[i] != NULL) {
+    // IdentifierNodeにキャストしておく
+    IdentifierNode *it = (IdentifierNode *)elems[i];
+    if (it != NULL) {
       switch(op_){
         case(OP::INT):
           os << "(int ";
+          break;
       }
-      elems[i]->PrintNode(os);
+      it->PrintNode(os);
+      // ここで大域変数かどうかを判定してoffsetを表示する
+      if (it->get_token_info()->get_offset() != -1) {
+        os << ":" << it->get_token_info()->get_offset();
+      }
       os << ")";
     }
   }
@@ -734,6 +746,7 @@ void ParamDeclList::set_param(ParamDeclList *l) {
   }
 }
 
+
 void FuncArgsList::PrintList(std::ostream &os) {
   for (int i = 0; i < elems.size(); i++) {
     elems[i]->PrintNode(os);
@@ -767,7 +780,6 @@ int DeclarationList::set_all_offset() {
 
   for (int i = 0; i < elems.size(); i++) {
     DeclList *dl = (DeclList *)(((DeclTypeNode *)elems[i])->getlist());
-
     // 各IdentiferNodeに対して相対番地を割り当てていく
     for (int d_num = 0; d_num < dl->get_elems_size(); d_num++) {
       IdentifierNode *in = (IdentifierNode *)(dl->get_elems_node(d_num));
