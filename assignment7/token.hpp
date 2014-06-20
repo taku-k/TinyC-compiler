@@ -66,7 +66,7 @@ public:
   TC::TkInfo *lookup_sym(std::string id);
   void globalize_sym(TkInfo *ti);
 
-  
+
 
 private:
   std::deque<TkInfo *> idlist;

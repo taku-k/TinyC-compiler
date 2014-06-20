@@ -174,6 +174,7 @@ Node *Node::getnode(int num) {
   }
   return NULL;
 }
+
 //
 //                       Node end
 //
@@ -202,12 +203,15 @@ IdentifierNode::IdentifierNode(std::string id, TC::TkInfo *tkinfo) {
 
   op_ = OP::ID;
   name_ = id;
-  tkinfo_ = new TC::TkInfo(tkinfo->get_lev(), tkinfo->get_id(), tkinfo->get_kind());
-  token_driver->Push(tkinfo_);
+  tkinfo_ = tkinfo;
 }
 
 TC::TkInfo *IdentifierNode::get_token_info() {
   return tkinfo_;
+}
+
+void IdentifierNode::set_token_info(TC::TkInfo *ti) {
+  tkinfo_ = ti;
 }
 
 IdentifierNode::~IdentifierNode() {
@@ -638,27 +642,38 @@ void DeclList::append(Node *node) {
   IdentifierNode *n = (IdentifierNode *)node;
   TC::TkInfo *ti = n->get_token_info();
   switch (ti->get_kind()) {
+
     case (TC::TkInfo::VAR):
       // 同一レベルであれば二重宣言でエラー
       if (ti->get_lev() == token_driver->get_cur_level()) {
         error("redeclaration of `%s`", ti->get_id().c_str());
       }
+      n->set_token_info(new TC::TkInfo(token_driver->get_cur_level(), ti->get_id()));
+      token_driver->Push(n->get_token_info());
       break;
+
     case (TC::TkInfo::FUN):       // すでに関数として宣言されているか
     case (TC::TkInfo::UNDEFFUN):  // すでに未定義関数として名前が使用されている
       // 同一レベルであれば二重宣言
       if (ti->get_lev() == token_driver->get_cur_level()) {
         error("`%S` redeclaration as different kind of symbol", ti->get_id().c_str());
       }
+      n->set_token_info(new TC::TkInfo(token_driver->get_cur_level(), ti->get_id()));
+      token_driver->Push(n->get_token_info());
       break;
+
     case (TC::TkInfo::PARM):
       warn("declaration of `%s` shadows a parameter", ti->get_id().c_str());
+      n->set_token_info(new TC::TkInfo(token_driver->get_cur_level(), ti->get_id()));
+      token_driver->Push(n->get_token_info());
       break;
+
     case (TC::TkInfo::FRESH):
       break;
   }
+  ti = n->get_token_info();
   ti->set_kind(TC::TkInfo::VAR);
-  ti->set_lev(token_driver->get_cur_level());
+  // ti->set_lev(token_driver->get_cur_level());
   elems.push_back((Node *)n);
 }
 
@@ -690,16 +705,21 @@ void ParamDeclList::append(Node *node) {
     case (TC::TkInfo::VAR):
     case (TC::TkInfo::FUN):
     case (TC::TkInfo::UNDEFFUN):
+      n->set_token_info(new TC::TkInfo(token_driver->get_cur_level(), ti->get_id()));
+      token_driver->Push(n->get_token_info());
       break;
+
     case (TC::TkInfo::PARM):
       error("redeclaration of `%s`", ti->get_id().c_str());
       elems.push_back((Node *)node);
       return;
+
     case (TC::TkInfo::FRESH):
       break;
+
   }
+  ti = n->get_token_info();
   ti->set_kind(TC::TkInfo::PARM);
-  ti->set_lev(token_driver->get_cur_level());
   elems.push_back((Node *)node);
 }
 

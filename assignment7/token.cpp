@@ -59,15 +59,12 @@ void TC::Token_Driver::Push(TkInfo *ti) {
 }
 
 void TC::Token_Driver::Pop(int lev) {
-  int index = 0;
   for (int i = 0; i < idlist.size(); i++) {
     if (idlist[i]->get_lev() == lev) {
-      index = i;
+      idlist.pop_front();
+    } else {
+      break;
     }
-  }
-
-  for (int i = 0; i <= index; i++) {
-    idlist.pop_front();
   }
 }
 
@@ -90,9 +87,9 @@ TC::TkInfo *TC::Token_Driver::lookup_sym(std::string id) {
 }
 
 void TC::Token_Driver::globalize_sym(TkInfo *ti) {
-  debug();
   idlist.pop_front();
   idlist.push_back(ti);
-  debug();
+  debuglist.pop_front();
+  debuglist.push_back(ti);
 }
 

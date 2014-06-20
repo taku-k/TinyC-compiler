@@ -163,6 +163,7 @@ public:
   IdentifierNode(std::string id, TC::TkInfo *tkinfo);
   ~IdentifierNode();
   TC::TkInfo *get_token_info();
+  void set_token_info(TC::TkInfo *ti);
   void PrintNode(void);
 private:
   TC::TkInfo *tkinfo_;
