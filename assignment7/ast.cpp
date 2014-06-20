@@ -1,10 +1,126 @@
 #include "ast.hpp"
 
+
+
+void set_tc_driver(TC::TC_Driver *d) {
+  tc_driver = d;
+}
+void set_tc_scanner(TC::TC_Scanner *s) {
+  tc_scanner = s;
+}
+
+void set_token_driver(TC::Token_Driver *d) {
+  token_driver = d;
+}
+
+
+// idを引数にしてその名前と同じノードがすでに宣言されていたら
+// そのノードのトークン情報を使って新しいノードを作成
+// なければ初期値のノードを作成
+Node *make_identifier(std::string idname) {
+  if (token_driver->lookup_sym(idname)) {
+    // std::cerr << token_driver->lookup_sym(idname) << std::endl;
+    return new IdentifierNode(idname,token_driver->lookup_sym(idname));
+  }
+  return new IdentifierNode(idname);
+}
+
+Node *make_func_def(Node *node) {
+  IdentifierNode *n = (IdentifierNode *)node;
+  TC::TkInfo *ti = n->get_token_info();
+  switch (ti->get_kind()) {
+    case (TC::TkInfo::VAR):
+      error("`%s` redeclared as different kind of symbol", ti->get_id().c_str());
+      break;
+    case (TC::TkInfo::FUN):
+      error("redefinition of `%s`", ti->get_id().c_str());
+      break;
+    case (TC::TkInfo::UNDEFFUN):
+    case (TC::TkInfo::FRESH):
+      ti->set_kind(TC::TkInfo::FUN);
+      break;
+  }
+  return node;
+}
+
+Node *ref_var(Node *node) {
+  IdentifierNode *n = (IdentifierNode *)node;
+  TC::TkInfo *ti = n->get_token_info();
+  switch (ti->get_kind()) {
+    case (TC::TkInfo::VAR):
+    case (TC::TkInfo::PARM):
+      break;
+    case (TC::TkInfo::FUN):
+    case (TC::TkInfo::UNDEFFUN):
+      error("function `%s` is used as variable", n->getname().c_str());
+      break;
+    case (TC::TkInfo::FRESH):
+      error("`%s` undeclared variable", n->getname().c_str());
+      ti->set_kind(TC::TkInfo::VAR);
+      break;
+  }
+  return node;
+}
+
+Node *ref_func(Node *node) {
+  IdentifierNode *n = (IdentifierNode *)node;
+  TC::TkInfo *ti = n->get_token_info();
+  switch (ti->get_kind()) {
+    case (TC::TkInfo::VAR):
+    case (TC::TkInfo::PARM):
+      error("variable `%s` is used as function", n->getname().c_str());
+      break;
+    case (TC::TkInfo::FUN):
+    case (TC::TkInfo::UNDEFFUN):
+      break;
+    case (TC::TkInfo::FRESH):
+      warn("`%s` undeclared function", n->getname().c_str());
+      ti->set_kind(TC::TkInfo::UNDEFFUN);
+      if (ti->get_lev() > 0) {
+        ti->set_lev(0);
+        token_driver->globalize_sym(ti);
+      }
+      break;
+  }
+  return node;
+}
+
+
+void error(const char *fmt, ...)
+{
+  va_list argp;
+  va_start(argp, fmt);
+  tc_driver->semnerrs_up();
+  fprintf(stderr, "%d: ", tc_scanner->yylineno);
+  vfprintf(stderr, fmt, argp);
+  fprintf(stderr, "\n");
+  va_end(argp);
+}
+
+void warn(const char *fmt, ...)
+{
+  va_list argp;
+  va_start(argp, fmt);
+  fprintf(stderr, "%d: warning: ", tc_scanner->yylineno);
+  vfprintf(stderr, fmt, argp);
+  fprintf(stderr, "\n");
+  va_end(argp);
+}
+
 //
 //                  NodeList methods
 //
 NodeList::~NodeList(void) {
-	//std::for_each(list.begin(), list.end(), delete_object());
+
+}
+
+void NodeList::add(Node *node) {
+  list.push_back(node);
+}
+
+void NodeList::add(Node *node, TC::TC_Driver *d) {
+  list.push_back(node);
+  std::cout << tcd;
 }
 
 void NodeList::PrintTree(void) {
@@ -15,7 +131,10 @@ void NodeList::PrintTree(void) {
     std::cout << ")\n";
   }
   std::cout << "---end---" << std::endl;
+  std::cout << "Driver : " << tc_driver 
+        << "\nScanner: " << tc_scanner << std::endl;
 }
+
 
 void NodeList::Debug(void) {
   std::cout << "-----Debug start-----" << std::endl;
@@ -65,11 +184,34 @@ Node *Node::getnode(int num) {
 /* IdentifierNode
  * 識別子ノード
  */
-IdentifierNode::IdentifierNode(std::string *id, TC::TC_Driver *d) {
+// IdentifierNode::IdentifierNode(std::string *id) {
+//   op_ = OP::ID;
+//   name_ = *id;
+//   tkinfo_ = new TC::TkInfo(token_driver->get_cur_level(), name_);
+//   token_driver->Push(tkinfo_);
+// }
+
+IdentifierNode::IdentifierNode(std::string id) {
   op_ = OP::ID;
-  name_ = *id;
-  tkinfo_ = new TC::TkInfo((d->getTokenDriver())->get_level(), name_);
-  (d->getTokenDriver())->Push(tkinfo_);
+  name_ = id;
+  tkinfo_ = new TC::TkInfo(token_driver->get_cur_level(), name_);
+  token_driver->Push(tkinfo_);
+}
+
+IdentifierNode::IdentifierNode(std::string id, TC::TkInfo *tkinfo) {
+
+  op_ = OP::ID;
+  name_ = id;
+  tkinfo_ = new TC::TkInfo(tkinfo->get_lev(), tkinfo->get_id(), tkinfo->get_kind());
+  token_driver->Push(tkinfo_);
+}
+
+TC::TkInfo *IdentifierNode::get_token_info() {
+  return tkinfo_;
+}
+
+IdentifierNode::~IdentifierNode() {
+  delete tkinfo_;
 }
 
 void IdentifierNode::PrintNode(void) {
@@ -474,6 +616,8 @@ FuncCallNode::FuncCallNode(Node *id, List *args) : Node() {
   list_ = args;
 }
 
+
+
 void FuncCallNode::PrintNode(void) {
   std::cout << "(FCALL ";
   PrintNum(0);
@@ -486,8 +630,37 @@ void FuncCallNode::PrintNode(void) {
  */
 
 
-
-
+/*
+ *                DeclList
+ *                nodeにはIdentifierNode
+ */
+void DeclList::append(Node *node) {
+  IdentifierNode *n = (IdentifierNode *)node;
+  TC::TkInfo *ti = n->get_token_info();
+  switch (ti->get_kind()) {
+    case (TC::TkInfo::VAR):
+      // 同一レベルであれば二重宣言でエラー
+      if (ti->get_lev() == token_driver->get_cur_level()) {
+        error("redeclaration of `%s`", ti->get_id().c_str());
+      }
+      break;
+    case (TC::TkInfo::FUN):       // すでに関数として宣言されているか
+    case (TC::TkInfo::UNDEFFUN):  // すでに未定義関数として名前が使用されている
+      // 同一レベルであれば二重宣言
+      if (ti->get_lev() == token_driver->get_cur_level()) {
+        error("`%S` redeclaration as different kind of symbol", ti->get_id().c_str());
+      }
+      break;
+    case (TC::TkInfo::PARM):
+      warn("declaration of `%s` shadows a parameter", ti->get_id().c_str());
+      break;
+    case (TC::TkInfo::FRESH):
+      break;
+  }
+  ti->set_kind(TC::TkInfo::VAR);
+  ti->set_lev(token_driver->get_cur_level());
+  elems.push_back((Node *)n);
+}
 
 void DeclList::PrintList(int op) {
   op_ = op;
@@ -502,7 +675,33 @@ void DeclList::PrintList(int op) {
     }
   }
 }
+/*
+ *                DeclList
+ */
 
+
+/*
+ *                ParamDeclList
+ */
+void ParamDeclList::append(Node *node) {
+  IdentifierNode *n = (IdentifierNode *)(node->getnode(0));
+  TC::TkInfo *ti = n->get_token_info();
+  switch (ti->get_kind()) {
+    case (TC::TkInfo::VAR):
+    case (TC::TkInfo::FUN):
+    case (TC::TkInfo::UNDEFFUN):
+      break;
+    case (TC::TkInfo::PARM):
+      error("redeclaration of `%s`", ti->get_id().c_str());
+      elems.push_back((Node *)node);
+      return;
+    case (TC::TkInfo::FRESH):
+      break;
+  }
+  ti->set_kind(TC::TkInfo::PARM);
+  ti->set_lev(token_driver->get_cur_level());
+  elems.push_back((Node *)node);
+}
 
 void FuncArgsList::PrintList() {
   for (int i = 0; i < elems.size(); i++) {

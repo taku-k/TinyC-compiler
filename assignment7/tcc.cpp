@@ -13,9 +13,15 @@ int main(const int argc, const char **argv)
 
   driver.parse(argv[1]);
 
-  driver.print();
+  if (driver.get_semnerrs() == 0) {
+    driver.print();
+  }
 
   (driver.getTokenDriver())->debug();
+
+  // if ((driver.getTokenDriver())->lookup_sym("a")) {
+  //   std::cout << 1 << std::endl;
+  // }
 
   return 0;
 }

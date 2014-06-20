@@ -14,6 +14,7 @@ namespace TC{
 
 class TC_Scanner : public yyFlexLexer{
 public:
+  int yylineno;
   TC_Scanner(std::istream *in, TC::TC_Driver &d) : 
               yyFlexLexer(in), yylval(NULL), driver(d) {};
 

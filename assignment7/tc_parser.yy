@@ -43,7 +43,7 @@
 %token  T_Else
 %token  T_While
 %token  T_Return
-%token  <id>  Identifier
+%token  <id>  Id
 %token  <val> Integer
 %token  <op>  T_Equal
 %token  <op>  T_Or
@@ -77,13 +77,24 @@
 %type <node> primary_expr
 %type <list> argument_expression_list
 %type <node> constant
+%type <node> Identifier
+%type <node> func_def_declarator
+%type <node> func_call_identifier
+
 
 %destructor { if ($$)  { delete ($$); ($$) = NULL; } } <id>
 %destructor { if ($$)  { delete ($$); ($$) = NULL; } } <node>
+%destructor { if ($$)  { delete ($$); ($$) = NULL; } } <list>
+
 
 
 %%
-main                        : program                                   {}
+main                        : {
+                                set_tc_driver(&driver);
+                                set_tc_scanner(&scanner);
+                                set_token_driver(driver.getTokenDriver());
+                              } 
+                              program
                             ;
 
 program                     : external_declaration                      { nl.add($1); }
@@ -105,20 +116,22 @@ declarator_list             : declarator                                { ($$ = 
                             | declarator_list ',' declarator            { ($$ = $1)->append($3); }
                             ;
 
-declarator                  : Identifier                                { $$ = new IdentifierNode($1, &driver); }
+
+declarator                  : Identifier                                { $$ = $1; }
                             ;
 
 
 
 
-function_definition         : T_Int declarator subroutien '(' ')' compound_statement                        {
-                                                                                                              $$ = new FuncNode(new RetNode(OP::INT), $2, new ParamDeclList(), $6); 
-                                                                                                              (driver.getTokenDriver())->level_down();
-                                                                                                            }
-                            | T_Int declarator subroutien '(' parameter_type_list ')' compound_statement    {
-                                                                                                              $$ = new FuncNode(new RetNode(OP::INT), $2, $5, $7); 
-                                                                                                              (driver.getTokenDriver())->level_down();
-                                                                                                            }
+function_definition         : T_Int func_def_declarator subroutien_up '(' ')' compound_statement subroutien_down  {
+                                                                                                                    $$ = new FuncNode(new RetNode(OP::INT), $2, new ParamDeclList(), $6); 
+                                                                                                                  }
+                            | T_Int func_def_declarator subroutien_up '(' parameter_type_list ')' compound_statement subroutien_down {
+                                                                                                                                        $$ = new FuncNode(new RetNode(OP::INT), $2, $5, $7); 
+                                                                                                                                     }
+                            ;
+
+func_def_declarator         : declarator                                            { $$ = make_func_def($1); }
                             ;
 
 parameter_type_list         : parameter_declaration                                 { ($$ = new ParamDeclList())->append($1); }
@@ -137,25 +150,19 @@ statement                   : ';'                                               
                             | T_Return expression ';'                               { $$ = new RETURNStatNode($2); }
                             ;
 
-compound_statement          : subroutien '{' declaration_list '}'                   {
-                                                                                        $$ = new ComStatNode($3, new StatList());
-                                                                                        (driver.getTokenDriver())->level_down(); 
-                                                                                    }
-                            | subroutien '{' declaration_list statement_list '}'    {
-                                                                                        $$ = new ComStatNode($3, $4);
-                                                                                        (driver.getTokenDriver())->level_down();
-                                                                                    }
-                            | subroutien '{' statement_list '}'                     {
-                                                                                        $$ = new ComStatNode(new DeclarationList(), $3);
-                                                                                        (driver.getTokenDriver())->level_down();
-                                                                                    }
-                            | subroutien '{' '}'                                    {
-                                                                                        $$ = new ComStatNode(new DeclarationList(), new StatList());
-                                                                                        (driver.getTokenDriver())->level_down();
-                                                                                    }
+compound_statement          : subroutien_up '{' declaration_list '}' subroutien_down                 { $$ = new ComStatNode($3, new StatList()); }
+                            | subroutien_up '{' declaration_list statement_list '}' subroutien_down  { $$ = new ComStatNode($3, $4); }
+                            | subroutien_up '{' statement_list '}' subroutien_down                   { $$ = new ComStatNode(new DeclarationList(), $3); }
+                            | subroutien_up '{' '}' subroutien_down                                  { $$ = new ComStatNode(new DeclarationList(), new StatList()); }
                             ;
 
-subroutien                  :                                                       { (driver.getTokenDriver())->level_up(); }
+subroutien_up               :                                             { (driver.getTokenDriver())->level_up(); }
+                            ;
+
+subroutien_down             :                                             {
+                                                                            (driver.getTokenDriver())->Pop(driver.getTokenDriver()->get_cur_level());
+                                                                            (driver.getTokenDriver())->level_down();
+                                                                          }
                             ;
 
 declaration_list            : declaration                                 { ($$ = new DeclarationList())->append($1); }
@@ -171,7 +178,7 @@ expression                  : assign_expr                                 { $$ =
                             ;
 
 assign_expr                 : logical_OR_expr                             { $$ = new AssignExprNode($1); }
-                            | Identifier '=' assign_expr                  { $$ = new AssignExprNode(new IdentifierNode($1, &driver), $3); }
+                            | Identifier '=' assign_expr                  { $$ = new AssignExprNode(ref_var($1), $3); }
                             ;
 
 logical_OR_expr             : logical_AND_expr                            { $$ = $1; }
@@ -209,11 +216,14 @@ unary_expr                  : postfix_expr                                { $$ =
                             ;
 
 postfix_expr                : primary_expr                                { $$ = $1; }
-                            | Identifier '(' argument_expression_list ')' { $$ = new FuncCallNode(new IdentifierNode($1, &driver), $3); }
-                            | Identifier '(' ')'                          { $$ = new FuncCallNode(new IdentifierNode($1, &driver), new FuncArgsList());}
+                            | func_call_identifier '(' argument_expression_list ')' { $$ = new FuncCallNode($1, $3); }
+                            | func_call_identifier '(' ')'                          { $$ = new FuncCallNode($1, new FuncArgsList());}
                             ;
 
-primary_expr                : Identifier                                  { $$ = new IdentifierNode($1, &driver); }
+func_call_identifier        : Identifier                                  { $$ = ref_func($1); }
+                            ;
+
+primary_expr                : Identifier                                  { $$ = ref_var($1); }
                             | constant                                    { $$ = $1; }
                             | '(' expression ')'                          { $$ = $2; }
                             ;
@@ -224,6 +234,10 @@ argument_expression_list    : assign_expr                                 { ($$ 
 
 constant                    : Integer                                     { $$ = new IntegerNode($1); }
                             ;
+
+Identifier                  : Id                                          { $$ = make_identifier(*$1); }
+                            ;
+
 
 %%
 void TC::TC_Parser::error(const std::string &m) {

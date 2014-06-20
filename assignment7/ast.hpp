@@ -8,6 +8,8 @@
 #include <algorithm>
 #include <string.h>
 #include <deque>
+#include <cstdio>
+#include <stdarg.h>
 
 #include "tc_driver.hpp"
 #include "token.hpp"
@@ -16,6 +18,11 @@ class NodeList;
 class Node;
 class List;
 class TkInfo;
+namespace TC{
+  class TC_Driver;
+  class TC_Scanner;
+}
+class IdentifierNode;
 
 namespace OP{
   enum {
@@ -25,18 +32,32 @@ namespace OP{
 }
 
 
+static TC::TC_Driver *tc_driver;
+static TC::TC_Scanner *tc_scanner;
+static TC::Token_Driver *token_driver;
+void set_tc_driver(TC::TC_Driver *d);
+void set_tc_scanner(TC::TC_Scanner *s);
+void set_token_driver(TC::Token_Driver *d);
+
+Node *make_identifier(std::string idname);
+Node *make_func_def(Node *node);
+Node *ref_var(Node *node);
+Node *ref_func(Node *node);
+
+void error(const char *fmt, ...);
+void warn(const char *fmt, ...);
 
 
 // ノードのリスト
 // 最も外部のノードを保持しておく
 class NodeList{
 public:
-  NodeList() {}
+  NodeList(TC::TC_Driver *d) : tcd(d) {}
   ~NodeList(void);
 
-  void add(Node *node) {
-    list.push_back(node);
-  }
+  void add(Node *node);
+
+  void add(Node *node, TC::TC_Driver *d);
 
   void PrintTree(void);
 
@@ -45,6 +66,7 @@ public:
 
 private:
   std::vector<Node*> list;
+  TC::TC_Driver *tcd;
 };
 
 
@@ -103,7 +125,7 @@ public:
   List() {}
   virtual ~List(){};
 
-  void append(Node *node) {
+  virtual void append(Node *node) {
     elems.push_back(node);
   }
 
@@ -130,14 +152,17 @@ protected:
 
 //
 //
-//            Node から 継承
+//                Node から 継承
 //
 //
 
 
 class IdentifierNode : public Node {
 public:
-  IdentifierNode(std::string *id, TC::TC_Driver *d);
+  IdentifierNode(std::string id);
+  IdentifierNode(std::string id, TC::TkInfo *tkinfo);
+  ~IdentifierNode();
+  TC::TkInfo *get_token_info();
   void PrintNode(void);
 private:
   TC::TkInfo *tkinfo_;
@@ -177,7 +202,7 @@ private:
 // //
 
 
-// 意味解析情報保有
+
 class FuncNode : public Node {
 public:
   // node_[0] = RetNode, node_[1] = DeclNode, node_[2] = ParamDeclList
@@ -200,7 +225,6 @@ private:
 
 class ParamDeclNode : public Node {
 public:
-  // node_[0] = DeclNode
   ParamDeclNode(const int op, Node* node);
   void PrintNode(void);
 private:
@@ -286,7 +310,7 @@ public:
 private:
 };
 
-// 意味解析情報保有
+
 class FuncCallNode : public Node {
 public:
   FuncCallNode(Node *id, List *args);
@@ -305,12 +329,14 @@ private:
 class DeclList : public List {
 public:
   DeclList() {}
+  void append(Node *node);
   void PrintList(int op);
 };
 
 class ParamDeclList : public List {
 public:
   ParamDeclList() {}
+  void append(Node *node);
 private:
 };
 

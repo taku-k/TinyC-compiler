@@ -2,7 +2,7 @@
 #define __TOKEN_HPP__
 
 #include <string>
-#include <vector>
+#include <deque>
 
 #include "tc_parser.tab.hh"
 #include "tc_scanner.hpp"
@@ -13,16 +13,23 @@ namespace TC{
 class TkInfo {
 public:
   enum {
-    FRESH, VAR, FUN, PARM, UNDEFFU
+    FRESH, VAR, FUN, PARM, UNDEFFUN
   };
 
-  TkInfo(int lev, std::string str) :
-        op_(-1), lev_(lev), kind_(FRESH), offset_(-1), id_(str) {};
+  TkInfo(int lev, std::string str, int kind = FRESH)
+        : op_(-1), lev_(lev), kind_(kind), offset_(-1), id_(str)
+        , func_args_num(-1), relative_pos(-1) {};
 
   int get_op();
   int get_lev();
   int get_kind();
   int get_offset();
+  std::string get_id();
+  int get_func_args_num() {return func_args_num;};
+
+  void set_kind(int i) {kind_ = i;}
+  void set_lev(int i) {lev_ = i;}
+  void set_func_args_num(int i) {func_args_num = i;}
 
   void debug();
 
@@ -32,6 +39,8 @@ private:
   int kind_;
   int offset_;
   std::string id_;
+  int func_args_num;
+  int relative_pos;
 };
 
 
@@ -44,20 +53,26 @@ public:
   ~Token_Driver();
 
   void Push(TkInfo *ti);
-  TkInfo* Pop();
+  void Pop(int lev);
 
   void level_up(){level_++;}
   void level_down(){level_--;}
-  int get_level(){return level_;}
-
-  void add_id(std::string id);
+  int get_cur_level(){return level_;}
 
   void debug();
 
+  // idtable内で引数と同じシンボルがあればそのTkInfoのアドレスを返す
+  // なければNULLを返す
+  TC::TkInfo *lookup_sym(std::string id);
+  void globalize_sym(TkInfo *ti);
+
+  
+
 private:
-  std::vector<TkInfo *> t_vec;
+  std::deque<TkInfo *> idlist;
+
+  std::deque<TkInfo *> debuglist;
   int level_;
-  std::vector<std::string> idtable;
 };
 
 }

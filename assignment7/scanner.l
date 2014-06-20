@@ -10,6 +10,7 @@
 %option noyywrap
 %option yyclass="TC::Scanner"
 %option nodefault
+%option yylineno
 %option c++
 
 delimiter 		[ \t\n]
@@ -62,7 +63,7 @@ symbol			";"|","|"("|")"|"{"|"}"|">"|"<"|"*"|"="|"+"|"/"|"-"
 
 {id}			{ 
             yylval->id = new std::string(yytext);
-            return token::Identifier;
+            return token::Id;
           }
 
 {symbol}	{ return *YYText(); }

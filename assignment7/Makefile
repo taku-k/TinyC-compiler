@@ -9,7 +9,7 @@ CXXSTD = -lstdc++
 CXXFLAGS = $(CXXDEBUG)
 
 
-CPPOBJ = tcc ast token tc_driver
+CPPOBJ = tcc tc_driver ast token
 SOBJ =  parser scanner
 
 FILES = $(addsuffix .cpp, $(CPPOBJ))

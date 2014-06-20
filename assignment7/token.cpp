@@ -8,17 +8,38 @@
 //
 //                  TkInfo
 //
-int TC::TkInfo::get_op() {return op_;}
-int TC::TkInfo::get_lev() {return lev_;}
-int TC::TkInfo::get_kind() {return kind_;}
-int TC::TkInfo::get_offset() {return offset_;}
+int TC::TkInfo::get_op()         { return op_;     }
+int TC::TkInfo::get_lev()        { return lev_;    }
+int TC::TkInfo::get_kind()       { return kind_;   }
+int TC::TkInfo::get_offset()     { return offset_; }
+std::string TC::TkInfo::get_id() { return id_;     }
 
 void TC::TkInfo::debug() {
-  std::cout << "OP " << op_ << std::endl;
-  std::cout << "lev " << lev_ << std::endl;
-  std::cout << "kind " << kind_ << std::endl;
-  std::cout << "offset " << offset_ << std::endl;
-  std::cout << "ID " << id_ << std::endl;
+  using namespace std;
+  cout << "ID : " << id_ << endl;
+  cout << "OP : " << op_ << endl;
+  cout << "lev : " << lev_ << endl;
+  cout << "kind : ";
+  switch(kind_) {
+    case (FRESH):
+      cout << "FRESH";
+      break;
+    case (VAR):
+      cout << "VAR";
+      break;
+    case (FUN):
+      cout << "FUN";
+      break;
+    case (PARM):
+      cout << "PARM";
+      break;
+    case (UNDEFFUN):
+      cout << "UNDEFFUN";
+      break;
+  }
+  cout << endl;
+  cout << "offset : " << offset_ << endl;
+  cout << "ADDRESS : " << this << endl;
 }
 
 //
@@ -33,24 +54,45 @@ TC::Token_Driver::Token_Driver() {}
 TC::Token_Driver::~Token_Driver() {}
 
 void TC::Token_Driver::Push(TkInfo *ti) {
-  t_vec.push_back(ti);
+  idlist.push_front(ti);
+  debuglist.push_front(ti);
 }
 
-TC::TkInfo* TC::Token_Driver::Pop() {
-  TC::TkInfo *ret = t_vec[t_vec.size()-1];
-  t_vec.pop_back();
-  return ret;
-}
+void TC::Token_Driver::Pop(int lev) {
+  int index = 0;
+  for (int i = 0; i < idlist.size(); i++) {
+    if (idlist[i]->get_lev() == lev) {
+      index = i;
+    }
+  }
 
-void TC::Token_Driver::add_id(std::string id) {
-  idtable.push_back(id);
-}
-
-void TC::Token_Driver::debug() {
-  for (int i = 0; i < t_vec.size(); i++) {
-    std::cout << "-------" << i << "--------\n";
-    std::cout << i << std::endl;
-    t_vec[i]->debug();
-    std::cout << "-------------------\n";
+  for (int i = 0; i <= index; i++) {
+    idlist.pop_front();
   }
 }
+
+
+void TC::Token_Driver::debug() {
+  for (std::deque<TkInfo *>::iterator it = debuglist.begin(); it != debuglist.end(); it++) {
+    std::cout << "---------------\n";
+    (*it)->debug();
+    std::cout << "---------------\n";
+  }
+}
+
+TC::TkInfo *TC::Token_Driver::lookup_sym(std::string id) {
+  for (std::deque<TkInfo *>::iterator it = idlist.begin(); it != idlist.end(); it++) {
+    if ((*it)->get_id() == id) {
+      return (*it);
+    }
+  }
+  return NULL;
+}
+
+void TC::Token_Driver::globalize_sym(TkInfo *ti) {
+  debug();
+  idlist.pop_front();
+  idlist.push_back(ti);
+  debug();
+}
+

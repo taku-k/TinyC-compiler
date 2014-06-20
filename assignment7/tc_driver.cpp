@@ -32,7 +32,7 @@ void TC::TC_Driver::parse(const char *filename) {
 
   delete(nodel);
   try {
-    nodel = new NodeList();
+    nodel = new NodeList(this);
     // std::cout << this << std::endl;
   } catch (std::bad_alloc &ba) {
     std::cerr << "Faild nodelist" << std::endl;

@@ -15,6 +15,7 @@ int f(int x, int y)
     x+y+w;
   }
   x+y;
+  g();
 }
 
 int g(int y)
