@@ -68,7 +68,7 @@ public:
   void globalize_sym(TkInfo *ti);
 
   int allocate_loc();
-  void release_loc();
+  void release_loc(int cnt);
 
   // void set_all_offset();
 

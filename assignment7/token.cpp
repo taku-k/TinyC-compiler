@@ -103,7 +103,7 @@ void TC::Token_Driver::globalize_sym(TkInfo *ti) {
 //         total_list[i]->set_offset(allocate_loc());
 //         current = total_list[i]->get_lev();
 //       } else {
-        
+
 //       }
 //     }
 //   }
@@ -117,7 +117,9 @@ int TC::Token_Driver::allocate_loc() {
   return last_alloc;
 }
 
-void TC::Token_Driver::release_loc() {
-  last_alloc += 4;
+void TC::Token_Driver::release_loc(int cnt) {
+  if (cnt != 0) {
+    last_alloc += (4 * cnt);
+  } 
 }
 

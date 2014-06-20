@@ -371,6 +371,14 @@ void ComStatNode::PrintNode(std::ostream &os) {
   // statement
   list_[1]->PrintList(os);
   os << "}";
+
+  all_relese();
+}
+
+void ComStatNode::all_relese() {
+  // list_[0]にはDeclarationList
+  DeclarationList *dl = (DeclarationList *)list_[0];
+  token_driver->release_loc(dl->get_count());
 }
 /*
  * ComStatNode END
@@ -731,4 +739,43 @@ void FuncArgsList::PrintList(std::ostream &os) {
     elems[i]->PrintNode(os);
     os << " ";
   }
+}
+
+
+
+// DeclarationList
+// 表示する前に相対番地を指定する。 
+void DeclarationList::PrintList(std::ostream &os) {
+  int count = set_all_offset();
+  for (int i = 0; i < elems.size(); i++) {
+    if (elems[i] != NULL) {
+      elems[i]->PrintNode(os);
+    }
+  }
+
+  count_ = count;
+  // // 割り当てを開放する
+  // token_driver->release_loc(count);
+}
+
+int DeclarationList::set_all_offset() {
+  // elemsにはDeclTypeNodeが格納されている
+  // DeclTypeNodeのnode_[0]にはDeclListが格納されている
+
+  // 割り当てた数を返すための変数
+  int count = 0;
+
+  for (int i = 0; i < elems.size(); i++) {
+    DeclList *dl = (DeclList *)(((DeclTypeNode *)elems[i])->getlist());
+
+    // 各IdentiferNodeに対して相対番地を割り当てていく
+    for (int d_num = 0; d_num < dl->get_elems_size(); d_num++) {
+      IdentifierNode *in = (IdentifierNode *)(dl->get_elems_node(d_num));
+      TC::TkInfo *ti = in->get_token_info();
+      ti->set_offset(token_driver->allocate_loc());
+      count++;
+    }
+  }
+
+  return count;
 }

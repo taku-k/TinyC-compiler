@@ -147,6 +147,9 @@ public:
   }
   virtual void PrintList(int op, std::ostream &os){};
 
+  Node *get_elems_node(int i) { return elems[i]; }
+  int get_elems_size() { return elems.size(); }
+
 protected:
   std::deque<Node *> elems;
   int op_;
@@ -196,6 +199,7 @@ public:
   DeclTypeNode(const int op, List* list);
   DeclTypeNode(const int op, List* list, TC::TC_Driver *d);
   void PrintNode(std::ostream &os);
+  List *getlist() { return list_; }
 private:
   List *list_;
 };
@@ -248,10 +252,12 @@ private:
 // compound_statement(bison)
 class ComStatNode : public Node {
 public:
-  // node_[0] = DeclList, node_[1] = StatList
+  // list_[0] = DeclList, list_[1] = StatList
   // ComStatNode(Node* first, Node* second);
   ComStatNode(List *list1, List* list2);
   void PrintNode(std::ostream &os);
+  // このノードの構文木の表示をすべて終えたらこの関数を実行して局所変数の開放を行う
+  void all_relese();
 private:
   List *list_[2];
 };
@@ -358,8 +364,12 @@ private:
 
 class DeclarationList : public List {
 public:
-  DeclarationList() {}
+  DeclarationList() : count_(0) {}
+  void PrintList(std::ostream &os);
+  int set_all_offset();
+  int get_count() { return count_; }
 private:
+  int count_;
 };
 
 class StatList : public List {
