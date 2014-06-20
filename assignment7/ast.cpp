@@ -107,6 +107,9 @@ void warn(const char *fmt, ...)
   va_end(argp);
 }
 
+
+
+
 //
 //                  NodeList methods
 //
@@ -123,16 +126,16 @@ void NodeList::add(Node *node, TC::TC_Driver *d) {
   std::cout << tcd;
 }
 
-void NodeList::PrintTree(void) {
-  std::cout << "---start---" << std::endl;
+void NodeList::PrintTree(std::ostream &os) {
+  os << "---start---" << std::endl;
   for (int i = 0; i < list.size(); i++) {
-    std::cout << "(";
+    os << "(";
     list[i]->PrintNode();
-    std::cout << ")\n";
+    os << ")\n";
   }
-  std::cout << "---end---" << std::endl;
-  std::cout << "Driver : " << tc_driver 
-        << "\nScanner: " << tc_scanner << std::endl;
+  os << "---end---" << std::endl;
+  // std::cout << "Driver : " << tc_driver 
+  //       << "\nScanner: " << tc_scanner << std::endl;
 }
 
 
@@ -310,6 +313,8 @@ FuncNode::FuncNode(Node* ret, Node* id,
   node_[1] = id;
   list_ = list;
   node_[3] = stat;
+
+  ((ParamDeclList *)list_)->set_param((ParamDeclList *)list_);
 }
 
 void FuncNode::PrintNode(void) {
@@ -721,6 +726,15 @@ void ParamDeclList::append(Node *node) {
   ti = n->get_token_info();
   ti->set_kind(TC::TkInfo::PARM);
   elems.push_back((Node *)node);
+}
+
+void ParamDeclList::set_param(ParamDeclList *l) {
+  std::deque<Node *> e = l->elems;
+  for (int i = 0; i < e.size(); i++) {
+    IdentifierNode *n = (IdentifierNode *)(e[i]->getnode(0));
+    TC::TkInfo *ti = n->get_token_info();
+    ti->set_offset(4*(i+2));
+  }
 }
 
 void FuncArgsList::PrintList() {

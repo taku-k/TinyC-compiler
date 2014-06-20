@@ -65,7 +65,7 @@ void TC::TC_Driver::error(const std::string &err_m) {
 }
 
 void TC::TC_Driver::print() {
-  nodel->PrintTree();
+  nodel->PrintTree(std::cout);
 }
 
 

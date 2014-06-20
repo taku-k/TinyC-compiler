@@ -59,7 +59,7 @@ public:
 
   void add(Node *node, TC::TC_Driver *d);
 
-  void PrintTree(void);
+  void PrintTree(std::ostream &os);
 
   // debug 
   void Debug(void);
@@ -99,12 +99,12 @@ public:
   std::string getname(void);
   Node *getnode(int num);
 
-  virtual void PrintNode(void) {}
+  virtual void PrintNode(std::ostream &os) {}
   virtual void PrintNode(int) {}
 
-  inline void PrintNum(int i) {
+  inline void PrintNum(int i, std::ostream &os) {
     if (node_[i] != NULL) {
-      node_[i]->PrintNode();
+      node_[i]->PrintNode(os);
     }
   }
 
@@ -159,11 +159,16 @@ protected:
 
 class IdentifierNode : public Node {
 public:
+  enum {
+    DECL, REF
+  };
   IdentifierNode(std::string id);
   IdentifierNode(std::string id, TC::TkInfo *tkinfo);
   ~IdentifierNode();
+
   TC::TkInfo *get_token_info();
   void set_token_info(TC::TkInfo *ti);
+
   void PrintNode(void);
 private:
   TC::TkInfo *tkinfo_;
@@ -338,6 +343,7 @@ class ParamDeclList : public List {
 public:
   ParamDeclList() {}
   void append(Node *node);
+  void set_param(ParamDeclList *l);
 private:
 };
 

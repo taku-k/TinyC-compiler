@@ -13,12 +13,12 @@ namespace TC{
 class TkInfo {
 public:
   enum {
-    FRESH, VAR, FUN, PARM, UNDEFFUN
+    FRESH, VAR, FUN, PARM, UNDEFFUN, DECL, REF
   };
 
   TkInfo(int lev, std::string str, int kind = FRESH)
         : op_(-1), lev_(lev), kind_(kind), offset_(-1), id_(str)
-        , func_args_num(-1), relative_pos(-1) {};
+        , func_args_num(-1) {};
 
   int get_op();
   int get_lev();
@@ -27,9 +27,11 @@ public:
   std::string get_id();
   int get_func_args_num() {return func_args_num;};
 
-  void set_kind(int i) {kind_ = i;}
-  void set_lev(int i) {lev_ = i;}
-  void set_func_args_num(int i) {func_args_num = i;}
+  void set_op(int i)            { op_ = i;            }
+  void set_kind(int i)          { kind_ = i;         }
+  void set_lev(int i)           { lev_ = i;          }
+  void set_func_args_num(int i) { func_args_num = i; }
+  void set_offset(int i)        { offset_ = i;       }
 
   void debug();
 
@@ -40,7 +42,6 @@ private:
   int offset_;
   std::string id_;
   int func_args_num;
-  int relative_pos;
 };
 
 
@@ -66,13 +67,19 @@ public:
   TC::TkInfo *lookup_sym(std::string id);
   void globalize_sym(TkInfo *ti);
 
+  int allocate_loc();
+  void release_loc();
+
+  // void set_all_offset();
 
 
 private:
   std::deque<TkInfo *> idlist;
 
-  std::deque<TkInfo *> debuglist;
+  std::deque<TkInfo *> total_list;
   int level_;
+  int last_alloc;
+  int top_alloc;
 };
 
 }

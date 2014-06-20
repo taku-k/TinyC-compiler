@@ -27,7 +27,7 @@ public:
   // エラーを出力する関数
   void error(const std::string &err_m);
 
-  // 構文木を出力する関数 
+  // 構文木を出力する関数
   void print();
 
   TC::Token_Driver *getTokenDriver() { 
