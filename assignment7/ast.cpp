@@ -203,7 +203,7 @@ IdentifierNode::~IdentifierNode() {
 }
 
 void IdentifierNode::PrintNode(std::ostream &os) {
-  os << name_;
+  os << name_ << ":" << tkinfo_->get_lev();
 }
 /*
  * END

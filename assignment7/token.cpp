@@ -59,9 +59,11 @@ void TC::Token_Driver::Push(TkInfo *ti) {
 }
 
 void TC::Token_Driver::Pop(int lev) {
-  for (int i = 0; i < idlist.size(); i++) {
-    if (idlist[i]->get_lev() == lev) {
+  int index = 0;
+  while(index < idlist.size()) {
+    if (idlist[index]->get_lev() == lev) {
       idlist.pop_front();
+      index = 0;
     } else {
       break;
     }
@@ -70,7 +72,7 @@ void TC::Token_Driver::Pop(int lev) {
 
 
 void TC::Token_Driver::debug() {
-  for (std::deque<TkInfo *>::iterator it = total_list.begin(); it != total_list.end(); it++) {
+  for (std::deque<TkInfo *>::iterator it = idlist.begin(); it != idlist.end(); it++) {
     std::cout << "---------------\n";
     (*it)->debug();
     std::cout << "---------------\n";

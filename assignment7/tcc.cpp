@@ -17,7 +17,7 @@ int main(const int argc, const char **argv)
     driver.print();
   }
 
-  (driver.getTokenDriver())->debug();
+  // (driver.getTokenDriver())->debug();
 
   // if ((driver.getTokenDriver())->lookup_sym("a")) {
   //   std::cout << 1 << std::endl;
