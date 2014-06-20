@@ -35,17 +35,26 @@ namespace OP{
 static TC::TC_Driver *tc_driver;
 static TC::TC_Scanner *tc_scanner;
 static TC::Token_Driver *token_driver;
+
+// tc_driverにset
 void set_tc_driver(TC::TC_Driver *d);
+
+// tc_scannerにset
 void set_tc_scanner(TC::TC_Scanner *s);
+
+// token_driverにset
 void set_token_driver(TC::Token_Driver *d);
 
+// idnameと同じ変数名をtokenで探してあればそのトークン情報を持つノードを生成する
+// なければ初期値のトークン情報を持つノードを生成する 
 Node *make_identifier(std::string idname);
+
+// nodeの持つトークン情報を解析して適宜変更、もしくは新しいトークンを生成する
 Node *make_func_def(Node *node);
 Node *ref_var(Node *node);
 Node *ref_func(Node *node);
 
-void error(const char *fmt, ...);
-void warn(const char *fmt, ...);
+
 
 
 // ノードのリスト
@@ -100,7 +109,7 @@ public:
   Node *getnode(int num);
 
   virtual void PrintNode(std::ostream &os) {}
-  virtual void PrintNode(int) {}
+  virtual void PrintNode(int, std::ostream &os) {}
 
   inline void PrintNum(int i, std::ostream &os) {
     if (node_[i] != NULL) {
@@ -129,14 +138,14 @@ public:
     elems.push_back(node);
   }
 
-  virtual void PrintList(void) {
+  virtual void PrintList(std::ostream &os) {
     for (int i = 0; i < elems.size(); i++) {
       if (elems[i] != NULL) {
-        elems[i]->PrintNode();
+        elems[i]->PrintNode(os);
       }
     }
   }
-  virtual void PrintList(int){};
+  virtual void PrintList(int op, std::ostream &os){};
 
 protected:
   std::deque<Node *> elems;
@@ -169,7 +178,7 @@ public:
   TC::TkInfo *get_token_info();
   void set_token_info(TC::TkInfo *ti);
 
-  void PrintNode(void);
+  void PrintNode(std::ostream &os);
 private:
   TC::TkInfo *tkinfo_;
 };
@@ -177,7 +186,7 @@ private:
 class IntegerNode : public Node {
 public:
   IntegerNode(int val);
-  void PrintNode(void);
+  void PrintNode(std::ostream &os);
 private:
 };
 
@@ -186,7 +195,7 @@ class DeclTypeNode : public Node {
 public:
   DeclTypeNode(const int op, List* list);
   DeclTypeNode(const int op, List* list, TC::TC_Driver *d);
-  void PrintNode(void);
+  void PrintNode(std::ostream &os);
 private:
   List *list_;
 };
@@ -214,7 +223,7 @@ public:
   // node_[0] = RetNode, node_[1] = DeclNode, node_[2] = ParamDeclList
   // node_[3] = ComStatNode
   FuncNode(Node* ret, Node* id, List* list, Node* stat);
-  void PrintNode(void);
+  void PrintNode(std::ostream &os);
 private:
   List *list_;
 };
@@ -224,7 +233,7 @@ private:
 class RetNode : public Node {
 public:
   RetNode(const int op);
-  void PrintNode(void);
+  void PrintNode(std::ostream &os);
 private:
 };
 
@@ -232,7 +241,7 @@ private:
 class ParamDeclNode : public Node {
 public:
   ParamDeclNode(const int op, Node* node);
-  void PrintNode(void);
+  void PrintNode(std::ostream &os);
 private:
 };
 
@@ -242,7 +251,7 @@ public:
   // node_[0] = DeclList, node_[1] = StatList
   // ComStatNode(Node* first, Node* second);
   ComStatNode(List *list1, List* list2);
-  void PrintNode(void);
+  void PrintNode(std::ostream &os);
 private:
   List *list_[2];
 };
@@ -253,7 +262,7 @@ class StatNode : public Node {
 public:
   // node_[0] = 
   StatNode(Node* node);
-  void PrintNode(void);
+  void PrintNode(std::ostream &os);
 private:
 };
 
@@ -262,7 +271,7 @@ class ExpressionList : public Node {
 public:
   // node_[0] = AssignExprNode, node_[1] = ExpressionList
   ExpressionList(Node* node, Node* list);
-  void PrintNode(void);
+  void PrintNode(std::ostream &os);
 private:
 };
 
@@ -271,7 +280,7 @@ public:
   // node_[0] = ExpressionList, node_[1] = StatNode etc
   IFStatNode(Node* expr, Node* stat);
   IFStatNode(Node* expr, Node* stat, Node* elsestat);
-  void PrintNode(void);
+  void PrintNode(std::ostream &os);
 private:
 };
 
@@ -279,7 +288,7 @@ class WHILEStatNode : public Node {
 public:
   // node_[0] = ExpressionList, node_[1] = StatNode etc
   WHILEStatNode(Node* expr, Node* stat);
-  void PrintNode(void);
+  void PrintNode(std::ostream &os);
 private:
 };
 
@@ -287,7 +296,7 @@ class RETURNStatNode : public Node {
 public:
   // node_[0] = ExpressionList
   RETURNStatNode(Node* expr);
-  void PrintNode(void);
+  void PrintNode(std::ostream &os);
 private:
 };
 
@@ -296,7 +305,7 @@ class AssignExprNode : public Node {
 public:
   AssignExprNode(Node *node);
   AssignExprNode(Node *id, Node* node);
-  void PrintNode(void);
+  void PrintNode(std::ostream &os);
 private:
 };
 
@@ -304,7 +313,7 @@ private:
 class ExprNode : public Node {
 public:
   ExprNode(const int op, Node *n1, Node *n2);
-  void PrintNode(void);
+  void PrintNode(std::ostream &os);
 private:
 };
 
@@ -312,7 +321,7 @@ class UnaryNode : public Node {
 public:
   // node_[0] = 
   UnaryNode(const int op, Node *node);
-  void PrintNode(void);
+  void PrintNode(std::ostream &os);
 private:
 };
 
@@ -320,7 +329,7 @@ private:
 class FuncCallNode : public Node {
 public:
   FuncCallNode(Node *id, List *args);
-  void PrintNode(void);
+  void PrintNode(std::ostream &os);
 private:
   List *list_;
 };
@@ -336,7 +345,7 @@ class DeclList : public List {
 public:
   DeclList() {}
   void append(Node *node);
-  void PrintList(int op);
+  void PrintList(int op, std::ostream &os);
 };
 
 class ParamDeclList : public List {
@@ -362,7 +371,7 @@ private:
 class FuncArgsList : public List {
 public:
   FuncArgsList() {}
-  void PrintList();
+  void PrintList(std::ostream &os);
 private:
 };
 

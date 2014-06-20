@@ -69,5 +69,27 @@ void TC::TC_Driver::print() {
 }
 
 
+void TC::TC_Driver::error(const char *fmt, ...)
+{
+  va_list argp;
+  va_start(argp, fmt);
+  semnerrs_up();
+  fprintf(stderr, "%d: ", scanner->yylineno);
+  vfprintf(stderr, fmt, argp);
+  fprintf(stderr, "\n");
+  va_end(argp);
+}
+
+void TC::TC_Driver::warn(const char *fmt, ...)
+{
+  va_list argp;
+  va_start(argp, fmt);
+  fprintf(stderr, "%d: warning: ", scanner->yylineno);
+  vfprintf(stderr, fmt, argp);
+  fprintf(stderr, "\n");
+  va_end(argp);
+}
+
+
 
 

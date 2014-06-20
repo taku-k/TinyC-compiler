@@ -36,6 +36,13 @@ public:
 
   int get_semnerrs() { return semnerrs; }
 
+  // errorを出力する
+  // エラー回数をカウントする
+  void error(const char *fmt, ...);
+
+  // warnを出力する
+  void warn(const char *fmt, ...);
+
   void semnerrs_up() {
     semnerrs++;
   }

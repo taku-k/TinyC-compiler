@@ -30,10 +30,10 @@ Node *make_func_def(Node *node) {
   TC::TkInfo *ti = n->get_token_info();
   switch (ti->get_kind()) {
     case (TC::TkInfo::VAR):
-      error("`%s` redeclared as different kind of symbol", ti->get_id().c_str());
+      tc_driver->error("`%s` redeclared as different kind of symbol", ti->get_id().c_str());
       break;
     case (TC::TkInfo::FUN):
-      error("redefinition of `%s`", ti->get_id().c_str());
+      tc_driver->error("redefinition of `%s`", ti->get_id().c_str());
       break;
     case (TC::TkInfo::UNDEFFUN):
     case (TC::TkInfo::FRESH):
@@ -52,10 +52,10 @@ Node *ref_var(Node *node) {
       break;
     case (TC::TkInfo::FUN):
     case (TC::TkInfo::UNDEFFUN):
-      error("function `%s` is used as variable", n->getname().c_str());
+      tc_driver->error("function `%s` is used as variable", n->getname().c_str());
       break;
     case (TC::TkInfo::FRESH):
-      error("`%s` undeclared variable", n->getname().c_str());
+      tc_driver->error("`%s` undeclared variable", n->getname().c_str());
       ti->set_kind(TC::TkInfo::VAR);
       break;
   }
@@ -68,13 +68,13 @@ Node *ref_func(Node *node) {
   switch (ti->get_kind()) {
     case (TC::TkInfo::VAR):
     case (TC::TkInfo::PARM):
-      error("variable `%s` is used as function", n->getname().c_str());
+      tc_driver->error("variable `%s` is used as function", n->getname().c_str());
       break;
     case (TC::TkInfo::FUN):
     case (TC::TkInfo::UNDEFFUN):
       break;
     case (TC::TkInfo::FRESH):
-      warn("`%s` undeclared function", n->getname().c_str());
+      tc_driver->warn("`%s` undeclared function", n->getname().c_str());
       ti->set_kind(TC::TkInfo::UNDEFFUN);
       if (ti->get_lev() > 0) {
         ti->set_lev(0);
@@ -86,26 +86,7 @@ Node *ref_func(Node *node) {
 }
 
 
-void error(const char *fmt, ...)
-{
-  va_list argp;
-  va_start(argp, fmt);
-  tc_driver->semnerrs_up();
-  fprintf(stderr, "%d: ", tc_scanner->yylineno);
-  vfprintf(stderr, fmt, argp);
-  fprintf(stderr, "\n");
-  va_end(argp);
-}
 
-void warn(const char *fmt, ...)
-{
-  va_list argp;
-  va_start(argp, fmt);
-  fprintf(stderr, "%d: warning: ", tc_scanner->yylineno);
-  vfprintf(stderr, fmt, argp);
-  fprintf(stderr, "\n");
-  va_end(argp);
-}
 
 
 
@@ -130,7 +111,7 @@ void NodeList::PrintTree(std::ostream &os) {
   os << "---start---" << std::endl;
   for (int i = 0; i < list.size(); i++) {
     os << "(";
-    list[i]->PrintNode();
+    list[i]->PrintNode(os);
     os << ")\n";
   }
   os << "---end---" << std::endl;
@@ -221,8 +202,8 @@ IdentifierNode::~IdentifierNode() {
   delete tkinfo_;
 }
 
-void IdentifierNode::PrintNode(void) {
-  std::cout << name_;
+void IdentifierNode::PrintNode(std::ostream &os) {
+  os << name_;
 }
 /*
  * END
@@ -236,8 +217,8 @@ IntegerNode::IntegerNode(int val) : Node() {
   value_ = val;
 }
 
-void IntegerNode::PrintNode(void) {
-  std::cout << value_;
+void IntegerNode::PrintNode(std::ostream &os) {
+  os << value_;
 }
 /*
  * IntegerNode END
@@ -259,8 +240,8 @@ DeclTypeNode::DeclTypeNode(const int op, List* list, TC::TC_Driver *d) {
   // std::cout << (d->getTokenDriver())->get_level() << std::endl;
 }
 
-void DeclTypeNode::PrintNode(void) {
-  list_->PrintList(op_);
+void DeclTypeNode::PrintNode(std::ostream &os) {
+  list_->PrintList(op_, os);
 }
 /*
  * DeclTypeNode END
@@ -317,15 +298,15 @@ FuncNode::FuncNode(Node* ret, Node* id,
   ((ParamDeclList *)list_)->set_param((ParamDeclList *)list_);
 }
 
-void FuncNode::PrintNode(void) {
-  std::cout << "( ";
-  PrintNum(0);
-  std::cout << " ";
-  PrintNum(1);
-  std::cout << ") (";
-  list_->PrintList();
-  std::cout << ")\n";
-  PrintNum(3);
+void FuncNode::PrintNode(std::ostream &os) {
+  os << "( ";
+  PrintNum(0, os);
+  os << " ";
+  PrintNum(1, os);
+  os << ") (";
+  list_->PrintList(os);
+  os << ")\n";
+  PrintNum(3, os);
 }
 /*
  *  FundNode END
@@ -339,10 +320,10 @@ RetNode::RetNode(const int op) {
   op_ = op;
 }
 
-void RetNode::PrintNode(void) {
+void RetNode::PrintNode(std::ostream &os) {
   switch(op_) {
     case(OP::INT):
-      std::cout << "int";
+      os << "int";
   }
 }
 /*
@@ -360,14 +341,14 @@ ParamDeclNode::ParamDeclNode(const int op, Node* node) {
   node_[0] = node;
 }
 
-void ParamDeclNode::PrintNode(void) {
+void ParamDeclNode::PrintNode(std::ostream &os) {
   // DeclNodeでintも表示してもらう
   switch(op_){
     case(OP::INT):
-      std::cout << "(int ";
+      os << "(int ";
   }
-  PrintNum(0);
-  std::cout << ")";
+  PrintNum(0, os);
+  os << ")";
 }
 /*
  * ParamDeclNode END
@@ -383,13 +364,13 @@ ComStatNode::ComStatNode(List* list1, List* list2) {
   list_[1] = list2;
 }
 
-void ComStatNode::PrintNode(void) {
-  std::cout << "{" << std::endl;
+void ComStatNode::PrintNode(std::ostream &os) {
+  os << "{" << std::endl;
   // declartion
-  list_[0]->PrintList();
+  list_[0]->PrintList(os);
   // statement
-  list_[1]->PrintList();
-  std::cout << "}";
+  list_[1]->PrintList(os);
+  os << "}";
 }
 /*
  * ComStatNode END
@@ -405,9 +386,9 @@ StatNode::StatNode(Node* node) {
   node_[0] = node;
 }
 
-void StatNode::PrintNode(void) {
-  PrintNum(0);
-  std::cout << std::endl;
+void StatNode::PrintNode(std::ostream &os) {
+  PrintNum(0, os);
+  os << std::endl;
 }
 /*
  * StatNode END
@@ -423,12 +404,12 @@ ExpressionList::ExpressionList(Node* node, Node* list) {
   node_[1] = list;
 }
 
-void ExpressionList::PrintNode(void) {
-  PrintNum(1);
+void ExpressionList::PrintNode(std::ostream &os) {
+  PrintNum(1, os);
   if (node_[0] != NULL) {
-    std::cout << "(";
-    node_[0]->PrintNode();
-    std::cout << ")";
+    os << "(";
+    node_[0]->PrintNode(os);
+    os << ")";
   }
 }
 /*
@@ -450,15 +431,15 @@ IFStatNode::IFStatNode(Node* expr, Node* stat, Node* elsestat) {
   node_[2] = elsestat;
 }
 
-void IFStatNode::PrintNode(void) {
-  std::cout << "(IF ";
-  PrintNum(0);
-  std::cout << std::endl;
-  PrintNum(1);
+void IFStatNode::PrintNode(std::ostream &os) {
+  os << "(IF ";
+  PrintNum(0, os);
+  os << std::endl;
+  PrintNum(1, os);
   if (node_[2] != NULL) {
-    std::cout << " ELSE ";
-    node_[2]->PrintNode();
-    std::cout << ")\n"; 
+    os << " ELSE ";
+    node_[2]->PrintNode(os);
+    os << ")\n"; 
   }
 }
 /*
@@ -473,12 +454,12 @@ WHILEStatNode::WHILEStatNode(Node* expr, Node* stat) {
   node_[1] = stat;
 }
 
-void WHILEStatNode::PrintNode(void) {
-  std::cout << "(WHILE ";
-  PrintNum(0);
-  std::cout << std::endl;
-  PrintNum(1);
-  std::cout << ")\n";
+void WHILEStatNode::PrintNode(std::ostream &os) {
+  os << "(WHILE ";
+  PrintNum(0, os);
+  os << std::endl;
+  PrintNum(1, os);
+  os << ")\n";
 }
 /*
  * WHILEStatNode END
@@ -492,10 +473,10 @@ RETURNStatNode::RETURNStatNode(Node* expr) {
   node_[0] = expr;
 }
 
-void RETURNStatNode::PrintNode(void) {
-  std::cout << "(RETURN ";
-  PrintNum(0);
-  std::cout << " )";
+void RETURNStatNode::PrintNode(std::ostream &os) {
+  os << "(RETURN ";
+  PrintNum(0, os);
+  os << " )";
 }
 /*
  * RETURNStatNode END
@@ -515,7 +496,7 @@ AssignExprNode::AssignExprNode(Node *id, Node* node) {
 }
 
 
-void AssignExprNode::PrintNode(void) {
+void AssignExprNode::PrintNode(std::ostream &os) {
   // if (node_[0] != NULL) {
   //   if (name_ == "") {
   //     node_[0]->PrintNode();
@@ -526,13 +507,13 @@ void AssignExprNode::PrintNode(void) {
   //   }
   // }
   if (node_[0] != NULL) {
-    std::cout << "(= ";
-    node_[0]->PrintNode();
-    std::cout << " ";
-    PrintNum(1);
-    std::cout << ")";
+    os << "(= ";
+    node_[0]->PrintNode(os);
+    os << " ";
+    PrintNum(1, os);
+    os << ")";
   } else {
-    PrintNum(1);
+    PrintNum(1, os);
   }
 }
 /*
@@ -548,49 +529,49 @@ ExprNode::ExprNode(const int op, Node *n1, Node *n2) {
   node_[1] = n2;
 }
 
-void ExprNode::PrintNode(void) {
+void ExprNode::PrintNode(std::ostream &os) {
   switch(op_) {
     case(OP::OR):
-      std::cout << "(|| ";
+      os << "(|| ";
       break;
     case(OP::AND):
-      std::cout << "(&& ";
+      os << "(&& ";
       break;
     case(OP::GREATEREQUAL):
-      std::cout << "(>= ";
+      os << "(>= ";
       break;
     case(OP::LESSEQUAL):
-      std::cout << "(<= ";
+      os << "(<= ";
       break;
     case(OP::EQUAL):
-      std::cout << "(== ";
+      os << "(== ";
       break;
     case(OP::NOTEQUAL):
-      std::cout << "(!= ";
+      os << "(!= ";
       break;
     case(OP::LESS):
-      std::cout << "(< ";
+      os << "(< ";
       break;
     case(OP::GREATER):
-      std::cout << "(> ";
+      os << "(> ";
       break;
     case(OP::ADD):
-      std::cout << "(+ ";
+      os << "(+ ";
       break;
     case(OP::SUB):
-      std::cout << "(- ";
+      os << "(- ";
       break;
     case(OP::MUL):
-      std::cout << "(* ";
+      os << "(* ";
       break;
     case(OP::DIV):
-      std::cout << "/ ";
+      os << "/ ";
       break;
   }
-  PrintNum(0);
-  std::cout << " ";
-  PrintNum(1);
-  std::cout << ")";
+  PrintNum(0, os);
+  os << " ";
+  PrintNum(1, os);
+  os << ")";
 }
 /*
  * ExprNode END
@@ -604,14 +585,14 @@ UnaryNode::UnaryNode(const int op, Node *node) : Node() {
   node_[0] = node;
 }
 
-void UnaryNode::PrintNode(void) {
+void UnaryNode::PrintNode(std::ostream &os) {
   switch(op_) {
     case(OP::MINUS):
-      std::cout << "(- ";
+      os << "(- ";
       break;
   }
-  PrintNum(0);
-  std::cout << ")";
+  PrintNum(0, os);
+  os << ")";
 }
 /*
  * UnaryNode END
@@ -627,12 +608,12 @@ FuncCallNode::FuncCallNode(Node *id, List *args) : Node() {
 
 
 
-void FuncCallNode::PrintNode(void) {
-  std::cout << "(FCALL ";
-  PrintNum(0);
-  std::cout << " ";
-  list_->PrintList();
-  std::cout << ")";
+void FuncCallNode::PrintNode(std::ostream &os) {
+  os << "(FCALL ";
+  PrintNum(0, os);
+  os << " ";
+  list_->PrintList(os);
+  os << ")";
 }
 /*
  * FuncCallNode END
@@ -651,8 +632,9 @@ void DeclList::append(Node *node) {
     case (TC::TkInfo::VAR):
       // 同一レベルであれば二重宣言でエラー
       if (ti->get_lev() == token_driver->get_cur_level()) {
-        error("redeclaration of `%s`", ti->get_id().c_str());
+        tc_driver->error("redeclaration of `%s`", ti->get_id().c_str());
       }
+      // 新しくtkinfoを生成して、検索対象に追加する
       n->set_token_info(new TC::TkInfo(token_driver->get_cur_level(), ti->get_id()));
       token_driver->Push(n->get_token_info());
       break;
@@ -661,14 +643,16 @@ void DeclList::append(Node *node) {
     case (TC::TkInfo::UNDEFFUN):  // すでに未定義関数として名前が使用されている
       // 同一レベルであれば二重宣言
       if (ti->get_lev() == token_driver->get_cur_level()) {
-        error("`%S` redeclaration as different kind of symbol", ti->get_id().c_str());
+        tc_driver->error("`%S` redeclaration as different kind of symbol", ti->get_id().c_str());
       }
+      // 新しくtkinfoを生成して、検索対象に追加する
       n->set_token_info(new TC::TkInfo(token_driver->get_cur_level(), ti->get_id()));
       token_driver->Push(n->get_token_info());
       break;
 
     case (TC::TkInfo::PARM):
-      warn("declaration of `%s` shadows a parameter", ti->get_id().c_str());
+      tc_driver->warn("declaration of `%s` shadows a parameter", ti->get_id().c_str());
+      // 新しくtkinfoを生成して、検索対象に追加する
       n->set_token_info(new TC::TkInfo(token_driver->get_cur_level(), ti->get_id()));
       token_driver->Push(n->get_token_info());
       break;
@@ -679,19 +663,21 @@ void DeclList::append(Node *node) {
   ti = n->get_token_info();
   ti->set_kind(TC::TkInfo::VAR);
   // ti->set_lev(token_driver->get_cur_level());
+  // 最後にdequeに格納
   elems.push_back((Node *)n);
 }
 
-void DeclList::PrintList(int op) {
+
+void DeclList::PrintList(int op, std::ostream &os) {
   op_ = op;
   for (int i = 0; i < elems.size(); i++) {
     if (elems[i] != NULL) {
       switch(op_){
         case(OP::INT):
-          std::cout << "(int ";
+          os << "(int ";
       }
-      elems[i]->PrintNode();
-      std::cout << ")";
+      elems[i]->PrintNode(os);
+      os << ")";
     }
   }
 }
@@ -704,8 +690,10 @@ void DeclList::PrintList(int op) {
  *                ParamDeclList
  */
 void ParamDeclList::append(Node *node) {
+  // NodeをIdentifierNodeにキャストする
   IdentifierNode *n = (IdentifierNode *)(node->getnode(0));
   TC::TkInfo *ti = n->get_token_info();
+
   switch (ti->get_kind()) {
     case (TC::TkInfo::VAR):
     case (TC::TkInfo::FUN):
@@ -715,7 +703,7 @@ void ParamDeclList::append(Node *node) {
       break;
 
     case (TC::TkInfo::PARM):
-      error("redeclaration of `%s`", ti->get_id().c_str());
+      tc_driver->error("redeclaration of `%s`", ti->get_id().c_str());
       elems.push_back((Node *)node);
       return;
 
@@ -728,6 +716,7 @@ void ParamDeclList::append(Node *node) {
   elems.push_back((Node *)node);
 }
 
+// パラメータは8,12,16,...の順にoffsetをセットする
 void ParamDeclList::set_param(ParamDeclList *l) {
   std::deque<Node *> e = l->elems;
   for (int i = 0; i < e.size(); i++) {
@@ -737,9 +726,9 @@ void ParamDeclList::set_param(ParamDeclList *l) {
   }
 }
 
-void FuncArgsList::PrintList() {
+void FuncArgsList::PrintList(std::ostream &os) {
   for (int i = 0; i < elems.size(); i++) {
-    elems[i]->PrintNode();
-    std::cout << " ";
+    elems[i]->PrintNode(os);
+    os << " ";
   }
 }
