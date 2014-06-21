@@ -1,6 +1,7 @@
 int f() {
  int a;
  g();
+ h();
 }
 
 int g() {

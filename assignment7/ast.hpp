@@ -23,6 +23,7 @@ namespace TC{
   class TC_Scanner;
 }
 class IdentifierNode;
+class FuncCallNode;
 
 namespace OP{
   enum {
@@ -35,6 +36,7 @@ namespace OP{
 static TC::TC_Driver *tc_driver;
 static TC::TC_Scanner *tc_scanner;
 static TC::Token_Driver *token_driver;
+
 
 // tc_driverにset
 void set_tc_driver(TC::TC_Driver *d);

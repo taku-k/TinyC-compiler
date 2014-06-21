@@ -91,5 +91,31 @@ void TC::TC_Driver::warn(const char *fmt, ...)
 }
 
 
+// 関数呼び出しの引数チェック関数
+// token.hppから関数呼び出しのリストとidlistよを取得してくる
+// その２つのoffsetを照らしあわせてチェックする
+void TC::TC_Driver::func_args_check() {
+  std::vector<std::pair<std::string, int> > cl = t_driver->get_func_call_list();
+  std::deque<TkInfo *> fl = t_driver->get_id_list();
 
+  for (int cl_i = 0; cl_i < cl.size(); cl_i++) {
+    std::string id = cl[cl_i].first;
+    int args_size = cl[cl_i].second;
+    // std::cout << id << " " << args_size << std::endl;
 
+    for (int fl_i = 0; fl_i < fl.size(); fl_i++) {
+      TkInfo *ti = fl[fl_i];
+      // 同名の関数を見つけた場合
+      if (ti->get_id() == id && ti->get_lev() == 0) {
+        // 引数の数をチェックする
+        // 引数が少ない場合
+        if (ti->get_offset() > args_size) {
+          // エラー処理を行う
+          error("too few arguments to function `%s`", id.c_str());
+        } else if (ti->get_offset() < args_size) {
+          error("too many arguments to function `%s`", id.c_str());
+        }
+      }
+    }
+  }
+}

@@ -8,6 +8,8 @@
 #include "tc_scanner.hpp"
 #include "ast.hpp"
 
+class FuncCallNode;
+
 namespace TC{
 
 class TkInfo {
@@ -53,13 +55,17 @@ public:
   Token_Driver();
   ~Token_Driver();
 
+  // idlistとtotal_listの操作関数
   void Push(TkInfo *ti);
   void Pop(int lev);
+  std::deque<TkInfo *> get_id_list() { return idlist; }
 
+  // level関係の関数
   void level_up(){level_++;}
   void level_down(){level_--;}
   int get_cur_level(){return level_;}
 
+  // idlistのデバッグ関数 
   void debug();
 
   // idtable内で引数と同じシンボルがあればそのTkInfoのアドレスを返す
@@ -67,16 +73,22 @@ public:
   TC::TkInfo *lookup_sym(std::string id);
   void globalize_sym(TkInfo *ti);
 
+  // 相対番地関係の関数
   int allocate_loc();
   void release_loc(int cnt);
 
-  // void set_all_offset();
 
+  // 関数呼び出し関連の関数
+  void add_func_call_node(std::string id, int args_size);
+  std::vector<std::pair<std::string, int > > get_func_call_list() { return func_call_list; }
 
 private:
   std::deque<TkInfo *> idlist;
 
   std::deque<TkInfo *> total_list;
+
+  std::vector<std::pair<std::string, int> > func_call_list;
+
   int level_;
   int last_alloc;
   int top_alloc;

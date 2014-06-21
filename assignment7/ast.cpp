@@ -295,7 +295,10 @@ FuncNode::FuncNode(Node* ret, Node* id,
   list_ = list;
   node_[3] = stat;
 
+  // パラメータの相対番地を求める
   ((ParamDeclList *)list_)->set_param((ParamDeclList *)list_);
+  // 関数の引数をoffsetに格納する
+  ((IdentifierNode *)id)->get_token_info()->set_offset(((ParamDeclList *)list_)->get_elems_size());
 }
 
 void FuncNode::PrintNode(std::ostream &os) {
@@ -615,6 +618,21 @@ void UnaryNode::PrintNode(std::ostream &os) {
 FuncCallNode::FuncCallNode(Node *id, List *args) : Node() {
   node_[0] = id;
   list_ = args;
+
+  token_driver->add_func_call_node(id->getname(), args->get_elems_size());
+  // // 関数呼び出し時の引数チェックを行う
+  // // 呼び出す関数の引数の数
+  // int fa = ((IdentifierNode *)id)->get_token_info()->get_offset();
+  // // この呼び出しの引数の数
+  // int ta = args->get_elems_size();
+  // if (fa == -1) {
+  //   // このままだと再帰呼び出しに対応できない
+  //   // 引数チェックは
+  // } else if (fa < ta) {
+  //   tc_driver->error("too many arguments to function `%s`", id->getname().c_str());
+  // } else if (fa > ta) {
+  //   tc_driver->error("too few arguments to function `%s`", id->getname().c_str());
+  // }
 }
 
 

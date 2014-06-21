@@ -13,11 +13,14 @@ int main(const int argc, const char **argv)
 
   driver.parse(argv[1]);
 
+  // 関数引数チェックはここで
+  driver.func_args_check();
+
   if (driver.get_semnerrs() == 0) {
     driver.print();
   }
 
-  // (driver.getTokenDriver())->debug();
+  (driver.getTokenDriver())->debug();
 
   // if ((driver.getTokenDriver())->lookup_sym("a")) {
   //   std::cout << 1 << std::endl;

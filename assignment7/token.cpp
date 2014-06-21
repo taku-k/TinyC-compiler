@@ -125,3 +125,8 @@ void TC::Token_Driver::release_loc(int cnt) {
   } 
 }
 
+
+
+void TC::Token_Driver::add_func_call_node(std::string id, int args_size) {
+  func_call_list.push_back(make_pair(id, args_size));
+}

@@ -19,7 +19,7 @@ public:
 
 	TC_Driver() : parser(NULL),scanner(NULL),nodel(NULL),
             t_driver(NULL), semnerrs(0) {};
-	virtual ~TC_Driver();
+	~TC_Driver();
 
   // パース関数
 	void parse(const char *filename);
@@ -34,7 +34,7 @@ public:
     return t_driver;
   }
 
-  int get_semnerrs() { return semnerrs; }
+  void func_args_check();
 
   // errorを出力する
   // エラー回数をカウントする
@@ -43,9 +43,10 @@ public:
   // warnを出力する
   void warn(const char *fmt, ...);
 
-  void semnerrs_up() {
-    semnerrs++;
-  }
+
+  int get_semnerrs() { return semnerrs; }
+
+  void semnerrs_up() { semnerrs++; }
 
 private:
   TC::TC_Parser *parser;
