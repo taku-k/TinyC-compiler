@@ -1,9 +1,7 @@
 #include "ast.hpp"
 
 // NodeList methods
-NodeList::~NodeList(void) {
-	//std::for_each(list.begin(), list.end(), delete_object());
-}
+NodeList::~NodeList(void) {}
 
 void NodeList::PrintTree(void) {
   std::cout << "---start---" << std::endl;
@@ -32,86 +30,6 @@ void NodeList::Debug(void) {
 Nnode::Nnode() : op_(0), name_(""), value_(0), node_() {}
 
 
-// Nnode::Nnode(const int op, std::string str) {
-// 	op_ = op;
-// 	name_ = str;
-// 	value_ = 0;
-// 	for (int i = 0; i < Nnode::N; i++) {
-// 		node_[i] = NULL;
-// 	}
-// }
-
-// Nnode::Nnode(const int op, int val) {
-// 	op_ = op;
-// 	name_ = "";
-// 	value_ = val;
-// 	for (int i = 0; i < Nnode::N; i++) {
-// 		node_[i] = NULL;
-// 	}
-// }
-
-// Nnode::Nnode(const int op, Nnode *a) {
-// 	op_ = op;
-// 	name_ = "";
-// 	value_ = 0;
-// 	node_[0] = a;
-//   node_[1] = NULL;
-//   node_[2] = NULL;
-//   node_[3] = NULL;
-// }
-
-// Nnode::Nnode(const int op, Nnode *a, Nnode *b) {
-//   op_ = op;
-//   name_ = "";
-//   value_ = 0;
-//   node_[0] = a;
-//   node_[1] = b;
-//   node_[2] = NULL;
-//   node_[3] = NULL;
-// }
-
-// Nnode::Nnode(const int op, Nnode *a, Nnode *b, Nnode *c) {
-//   op_ = op;
-//   name_ = "";
-//   value_ = 0;
-//   node_[0] = a;
-//   node_[1] = b;
-//   node_[2] = c;
-//   node_[3] = NULL;
-// }
-
-// Nnode::Nnode(const int op, Nnode *a, Nnode *b, Nnode *c, Nnode *d) {
-//   op_ = op;
-//   name_ = "";
-//   value_ = 0;
-//   node_[0] = a;
-//   node_[1] = b;
-//   node_[2] = c;
-//   node_[3] = d;
-// }
-
-// Nnode* Nnode::MakeNode(const int op, std::string str, int val, Nnode *a /* NULL */,
-//         Nnode *b /* NULL */, Nnode *c /* NULL */, Nnode *d /* NULL */) {
-//   if (d != NULL) {
-//     return new Nnode(op, a, b, c, d);
-//   } else if (c != NULL) {
-//     return new Nnode(op, a, b, c);
-//   } else if (b != NULL) {
-//     return new Nnode(op, a, b);
-//   } else if (a != NULL) {
-//     return new Nnode(op, a);
-//   } else if (val == 0) {
-//     return new Nnode(op, str);
-//   } else if (str == "") {
-//     return new Nnode(op, val);
-//   } else {
-//     /*
-//      * error
-//      */
-
-//   }
-//   return NULL;
-// }
 
 
 int Nnode::getop(void) {
@@ -207,14 +125,6 @@ DeclList::DeclList(Nnode* node, Nnode* list) {
 
 
 void DeclList::PrintNode(void) {
-  // if (node_[1] != NULL && node_[0] != NULL) {
-  //   node_[0]->PrintDecl(op_);
-  //   node_[1]->PrintNode();
-  // } else if (node_[0] != NULL) {
-  //   node_[0]->PrintDecl(op_);
-  // } else if (node_[0] == NULL) {
-  //   node_[1]->PrintNode();
-  // }
   if (node_[1] != NULL) {
     node_[1]->PrintNode();
   }
@@ -349,9 +259,9 @@ ComStatNode::ComStatNode(Nnode* first, Nnode* second) {
 void ComStatNode::PrintNode(void) {
   std::cout << "{" << std::endl;
   // declartion
-  PrintNum(1);
-  // statement
   PrintNum(0);
+  // statement
+  PrintNum(1);
   std::cout << "\n}";
 }
 /*
@@ -368,12 +278,13 @@ DeclarationList::DeclarationList(Nnode* node, Nnode* list) {
   node_[1] = list;
 }
 
-// void DeclarationList::PrintNode(void) {
-//   node_[0]->PrintNode();
-//   if(node_[1] != NULL) {
-//     node_[1]->PrintNode();
-//   }
-// }
+void DeclarationList::PrintNode() {
+  node_[0]->PrintNode();
+  if (node_[1] != NULL) {
+    node_[1]->PrintNode();
+  }
+}
+
 /*
  * DeclarationNode END
  */
@@ -514,15 +425,6 @@ AssignExprNode::AssignExprNode(Nnode *id, Nnode* node) {
 
 
 void AssignExprNode::PrintNode(void) {
-  // if (node_[0] != NULL) {
-  //   if (name_ == "") {
-  //     node_[0]->PrintNode();
-  //   } else {
-  //     std::cout << "(= " << name_ << " ";
-  //     node_[0]->PrintNode();
-  //     std::cout << ")";
-  //   }
-  // }
   if (node_[0] != NULL) {
     std::cout << "(= ";
     node_[0]->PrintNode();
@@ -554,6 +456,12 @@ void ExprNode::PrintNode(void) {
     case(OP::AND):
       std::cout << "(&& ";
       break;
+    case(OP::GREATEREQUAL):
+      std::cout << "(>= ";
+      break;
+    case(OP::LESSEQUAL):
+      std::cout << "(<= ";
+      break;
     case(OP::EQUAL):
       std::cout << "(== ";
       break;
@@ -576,7 +484,7 @@ void ExprNode::PrintNode(void) {
       std::cout << "(* ";
       break;
     case(OP::DIV):
-      std::cout << "/ ";
+      std::cout << "(/ ";
       break;
   }
   PrintNum(0);

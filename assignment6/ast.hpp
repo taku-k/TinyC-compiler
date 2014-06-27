@@ -53,13 +53,6 @@ public:
 
   // constructor
   Nnode();
-  // Nnode(const int op, std::string str);
-  // Nnode(const int op, int val);
-  // Nnode(const int op, Nnode *a);
-  // Nnode(const int op, Nnode *a, Nnode *b);
-  // Nnode(const int op, Nnode *a, Nnode *b, Nnode *c);
-  // Nnode(const int op, Nnode *a, Nnode *b, Nnode *c, Nnode *d);
-
   // deconstructor
   virtual ~Nnode(void) {
     delete node_[0];
@@ -81,19 +74,6 @@ public:
       node_[i]->PrintNode();
     }
   }
-  // virtual void PrintDecl(int) {}
-  // virtual void PrintDecl(void) {}
-
-  // static Nnode* MakeNode(const int op, std::string str="", int val=0,
- //          Nnode *a=NULL, Nnode *b=NULL, Nnode *c=NULL, Nnode *d=NULL);
-  // static Nnode* MakeStat();
-  // static Nnode* MakeFuncDecl();
-  // static Nnode* MakeIfStat();
-  // static Nnode* MakeWhileStat();
-  // static Nnode* MakeElseStat();
-  // static Nnode* MakeRetStat();
-  // static Nnode* MakeIntDeclList();
-  // static Nnode* MakeIntDecl();
 
 protected:
 	int op_;
@@ -195,6 +175,7 @@ class DeclarationList : public Nnode {
 public:
   // node_[0] = DeclTypeNode, node_[1] = DeclarationList
   DeclarationList(Nnode* node, Nnode* list);
+  void PrintNode();
 private:
 };
 

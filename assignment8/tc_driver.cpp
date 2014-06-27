@@ -65,6 +65,8 @@ void TC::TC_Driver::error(const std::string &err_m) {
 }
 
 void TC::TC_Driver::print() {
+  // 構文木を出力しない設定 
+  //std::cout.setstate(std::ios_base::badbit);
   nodel->PrintTree(std::cout);
 }
 
@@ -113,9 +115,17 @@ void TC::TC_Driver::func_args_check() {
           // エラー処理を行う
           error("too few arguments to function `%s`", id.c_str());
         } else if (ti->get_offset() < args_size) {
+          // 多い場合もエラー 
           error("too many arguments to function `%s`", id.c_str());
         }
       }
     }
   }
+}
+
+
+void TC::TC_Driver::code_gen() {
+  cg = new CodeGen(t_driver);
+  cg->code_generate(nodel);
+  cg->debug();
 }

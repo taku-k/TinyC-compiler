@@ -5,5 +5,10 @@ int fact(int x) {
 		z = z * x;
 		x = x - 1;
 	}
+	if (x == z) {
+		x = x || x && x;
+	} else {
+		x = x * x + 1;
+	}
 	return z;
 }
