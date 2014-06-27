@@ -14,6 +14,7 @@ class StatList;
 class IFStatNode;
 class WHILEStatNode;
 class RETURNStatNode;
+class ExpressionList;
 
 /*
  * codegenでコードを生成する
@@ -49,7 +50,7 @@ public:
   void ret_state_gen(RETURNStatNode *rsn);
 
   // exprのコード生成
-  //void expr_gen();
+  void expr_gen(ExpressionList *epl);
 
   // 論理演算式のコード生成
   //void logical_gen();
@@ -73,7 +74,6 @@ private:
   // このtop_allocの値がNlocalに埋め込まれる
   int top_alloc;
   // levelに対してそのlevelでのoffsetの最大値が返される
-  map<int, int>
 };
 
 #endif
