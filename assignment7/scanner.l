@@ -34,16 +34,25 @@ symbol			";"|","|"("|")"|"{"|"}"|">"|"<"|"*"|"="|"+"|"/"|"-"
 
 "return"	{ return token::T_Return; }
 
-">="			{ return token::T_GreaterEqual; }
+">="			{ 
+            yylval->op = OP::GREATEREQUAL;
+            return token::T_GreaterEqual; 
+          }
 
-"<="			{ return token::T_LessEqual; }
+"<="			{ 
+            yylval->op = OP::LESSEQUAL;
+            return token::T_LessEqual; 
+          }
 
 "=="			{
             yylval->op = OP::EQUAL;
             return token::T_Equal;
           }
 
-"!="			{ return token::T_NotEqual; }
+"!="			{
+            yylval->op = OP::NOTEQUAL;
+            return token::T_NotEqual; 
+          }
 
 
 "&&"			{

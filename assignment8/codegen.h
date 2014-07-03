@@ -29,7 +29,7 @@ class AssignExprNode;
 class CodeGen {
 public:
   // コンストラクタ 
-  CodeGen(TC::Token_Driver *td);
+  CodeGen(TC::Token_Driver *td, ostream *o);
 
   // 最初に呼ばれる関数
   void code_generate(NodeList *nl);
@@ -71,6 +71,9 @@ private:
 
   // ラベルを発行する関数
   string make_label();
+
+  // 出力用stream
+  ostream *out;
 
   vector<string> code;
   int label;

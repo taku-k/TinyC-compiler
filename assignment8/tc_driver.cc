@@ -64,9 +64,11 @@ void TC::TC_Driver::error(const std::string &err_m) {
   std::cerr << "Error: " << err_m << std::endl;
 }
 
-void TC::TC_Driver::print() {
+void TC::TC_Driver::print(bool flag) {
   // 構文木を出力しない設定 
-  //std::cout.setstate(std::ios_base::badbit);
+  if (flag == false) {
+    std::cout.setstate(std::ios_base::badbit);
+  }
   nodel->PrintTree(std::cout);
 }
 
@@ -124,8 +126,14 @@ void TC::TC_Driver::func_args_check() {
 }
 
 
-void TC::TC_Driver::code_gen() {
-  cg = new CodeGen(t_driver);
+void TC::TC_Driver::code_gen(const char *filename, bool flag) {
+  if (!flag) {
+    out = new ofstream(filename);
+    cg = new CodeGen(t_driver, out);
+  } else {
+    cg = new CodeGen(t_driver, &cout);
+  }
+
   cg->code_generate(nodel);
   cg->debug();
 }

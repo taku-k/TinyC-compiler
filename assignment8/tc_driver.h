@@ -29,9 +29,10 @@ public:
 
 
   // 構文木を出力する関数
-  void print();
+  // flagがtrueなら構文木を出力する
+  void print(bool flag);
   // コードを生成する
-  void code_gen();
+  void code_gen(const char *filename, bool flag);
 
   TC::Token_Driver *getTokenDriver() { 
     return t_driver;
@@ -62,6 +63,7 @@ private:
   TC::Token_Driver *t_driver;
   CodeGen *cg;
 
+  std::ofstream *out;
   int semnerrs;
 };
 

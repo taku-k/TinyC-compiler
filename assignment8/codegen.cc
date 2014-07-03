@@ -26,7 +26,7 @@ string IntToString(int number)
 //   }
 // }
 
-CodeGen::CodeGen(TC::Token_Driver *td) : label(0) {
+CodeGen::CodeGen(TC::Token_Driver *td, ostream *o) : label(0), out(o) {
 }
 
 void CodeGen::code_generate(NodeList *nl) {
@@ -420,6 +420,6 @@ void CodeGen::expr_gen(Node *n) {
 
 void CodeGen::debug() {
   for (int i = 0; i < code.size(); i++) {
-    cerr << code[i] << endl;
+    (*out) << code[i] << endl;
   }
 }

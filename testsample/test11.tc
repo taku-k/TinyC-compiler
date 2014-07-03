@@ -1,6 +1,10 @@
 int foo(int b) {
 	int a;
 	a = 4;
-	a = a * b;
+	if (b != 3) {
+		a = a * b;
+	} else {
+		a = b;
+	}
 	return a;
 }
