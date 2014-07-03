@@ -1,5 +1,5 @@
-#ifndef __AST_HPP__
-#define __AST_HPP__
+#ifndef __AST_H__
+#define __AST_H__
 
 #include <iostream>
 #include <vector>
@@ -11,8 +11,8 @@
 #include <cstdio>
 #include <stdarg.h>
 
-#include "tc_driver.hpp"
-#include "token.hpp"
+#include "tc_driver.h"
+#include "token.h"
 
 class NodeList;
 class Node;
@@ -28,7 +28,7 @@ class FuncCallNode;
 namespace OP{
   enum {
     FUNC, FUNCNODE, STATNODE, COMSTATNODE, IFSTATNODE, IFELSESTATNODE,WHILESTATNODE, RETNODE,INT, ID, OR, AND, EQUAL, NOTEQUAL, LESSEQUAL,
-     GREATEREQUAL, LESS, GREATER, ADD, SUB, MUL, DIV, MINUS, INTEGERNODE, DECLTYPENODE, RETSTATNODE,
+     GREATEREQUAL, LESS, GREATER, ADD, SUB, MUL, DIV, MINUS, INTEGERNODE, DECLTYPENODE, RETSTATNODE, INTEGER
   };
 }
 
@@ -203,6 +203,8 @@ public:
   void set_token_info(TC::TkInfo *ti);
 
   void PrintNode(std::ostream &os);
+
+  int get_offset_from_node();
 private:
   TC::TkInfo *tkinfo_;
 };
@@ -296,14 +298,7 @@ public:
 private:
 };
 
-// expression(bison)
-class ExpressionList : public Node {
-public:
-  // node_[0] = AssignExprNode, node_[1] = ExpressionList
-  ExpressionList(Node* node, Node* list);
-  void PrintNode(std::ostream &os);
-private:
-};
+
 
 class IFStatNode : public Node {
 public:
@@ -365,6 +360,15 @@ private:
 };
 
 
+// expression(bison)
+class ExpressionList : public Node {
+public:
+  // node_[0] = AssignExprNode, node_[1] = ExpressionList
+  ExpressionList(Node* node, Node* list);
+  void PrintNode(std::ostream &os);
+private:
+};
+
 // 
 //
 //            List から 継承
@@ -408,5 +412,7 @@ public:
   void PrintList(std::ostream &os);
 private:
 };
+
+
 
 #endif

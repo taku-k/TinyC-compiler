@@ -1,12 +1,12 @@
-#ifndef __TOKEN_HPP__
-#define __TOKEN_HPP__
+#ifndef __TOKEN_H__
+#define __TOKEN_H__
 
 #include <string>
 #include <deque>
 
 #include "tc_parser.tab.hh"
-#include "tc_scanner.hpp"
-#include "ast.hpp"
+#include "tc_scanner.h"
+#include "ast.h"
 
 class FuncCallNode;
 

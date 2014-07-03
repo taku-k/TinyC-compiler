@@ -1,6 +1,6 @@
-#include "ast.hpp"
+#include "ast.h"
 
-#include "codegen.hpp"
+#include "codegen.h"
 
 void set_tc_driver(TC::TC_Driver *d) {
   tc_driver = d;
@@ -43,6 +43,7 @@ Node *make_func_def(Node *node) {
   return node;
 }
 
+// 変数の参照時の意味解析
 Node *ref_var(Node *node) {
   IdentifierNode *n = (IdentifierNode *)node;
   TC::TkInfo *ti = n->get_token_info();
@@ -210,6 +211,10 @@ IdentifierNode::~IdentifierNode() {
 void IdentifierNode::PrintNode(std::ostream &os) {
   os << name_ << ":" << tkinfo_->get_lev();
 }
+
+int IdentifierNode::get_offset_from_node() {
+  return tkinfo_->get_offset();
+}
 /*
  * END
  */
@@ -221,6 +226,7 @@ void IdentifierNode::PrintNode(std::ostream &os) {
 IntegerNode::IntegerNode(int val) : Node() {
   type_ = OP::INTEGERNODE;
   value_ = val;
+  op_ = OP::INTEGER;
 }
 
 void IntegerNode::PrintNode(std::ostream &os) {
@@ -600,7 +606,7 @@ void ExprNode::PrintNode(std::ostream &os) {
       os << "(* ";
       break;
     case(OP::DIV):
-      os << "/ ";
+      os << "(/ ";
       break;
   }
   PrintNum(0, os);

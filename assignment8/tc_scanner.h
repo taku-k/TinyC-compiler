@@ -8,7 +8,7 @@
 #define YY_DECL int  TC::TC_Scanner::yylex()
 
 #include "tc_parser.tab.hh"
-#include "tc_driver.hpp"
+#include "tc_driver.h"
 
 namespace TC{
 

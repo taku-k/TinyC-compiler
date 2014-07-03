@@ -9,12 +9,12 @@ CXXSTD = -lstdc++
 CXXFLAGS = $(CXXDEBUG)
 
 
-CPPOBJ = tcc tc_driver ast token codegen
+CXXOBJ = tcc tc_driver ast token codegen
 SOBJ =  parser scanner
 
-FILES = $(addsuffix .cpp, $(CPPOBJ))
+FILES = $(addsuffix .cc, $(CXXOBJ))
 
-OBJS  = $(addsuffix .o, $(CPPOBJ))
+OBJS  = $(addsuffix .o, $(CXXOBJ))
 
 CLEANLIST =  $(addsuffix .o, $(OBJ)) $(OBJS) \
 				 tc_parser.tab.cc tc_parser.tab.hh \
@@ -32,11 +32,11 @@ tcc: $(FILES)
 
 parser: tc_parser.yy
 	/usr/local/opt/bison/bin/bison -d -v tc_parser.yy
-	$(CXX) $(CXXFLAGS) -c -o parser.o tc_parser.tab.cc $(CXXSTD)
+	$(CXX) $(CXXFLAGS) -c -o parser.o tc_parser.tab.cc
 
 scanner: scanner.l
 	flex --outfile=tc_scanner.yy.cc  $<
-	$(CXX)  $(CXXFLAGS) -c tc_scanner.yy.cc -o scanner.o $(CXXSTD)
+	$(CXX)  $(CXXFLAGS) -c tc_scanner.yy.cc -o scanner.o
 
 .PHONY: clean
 clean:

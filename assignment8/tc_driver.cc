@@ -3,7 +3,7 @@
 #include <vector>
 #include <cstdlib>
 
-#include "tc_driver.hpp"
+#include "tc_driver.h"
 
 TC::TC_Driver::~TC_Driver(){
   delete(scanner);

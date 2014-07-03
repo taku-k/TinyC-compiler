@@ -1,14 +1,14 @@
-#ifndef __TCDRIVER_HPP__
-#define __TCDRIVER_HPP__
+#ifndef __TCDRIVER_H__
+#define __TCDRIVER_H__
 
 #include <string>
 #include <deque>
 
 #include "tc_parser.tab.hh"
-#include "tc_scanner.hpp"
-#include "ast.hpp"
-#include "token.hpp"
-#include "codegen.hpp"
+#include "tc_scanner.h"
+#include "ast.h"
+#include "token.h"
+#include "codegen.h"
 
 class CodeGen;
 

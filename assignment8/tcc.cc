@@ -1,7 +1,7 @@
 #include <iostream>
 #include <cstdlib>
 
-#include "tc_driver.hpp"
+#include "tc_driver.h"
 
 int main(const int argc, const char **argv)
 {
@@ -17,12 +17,12 @@ int main(const int argc, const char **argv)
   driver.func_args_check();
 
   if (driver.get_semnerrs() == 0) {
-    driver.print();
+    //driver.print();
     // コードの生成関数を呼び出す
     driver.code_gen();
   }
 
-  (driver.getTokenDriver())->debug();
+  //(driver.getTokenDriver())->debug();
 
   // if ((driver.getTokenDriver())->lookup_sym("a")) {
   //   std::cout << 1 << std::endl;

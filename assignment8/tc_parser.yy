@@ -23,7 +23,7 @@
   #include <cstdlib>
   #include <iostream>
   #include <string>
-  #include "tc_driver.hpp"
+  #include "tc_driver.h"
 
 #undef yylex
 #define yylex scanner.yylex

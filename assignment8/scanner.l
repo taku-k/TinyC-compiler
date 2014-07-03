@@ -1,8 +1,8 @@
 %{
 	#include <string>
 	#include <iostream>
-	#include "tc_scanner.hpp"
-  #include "ast.hpp"
+	#include "tc_scanner.h"
+  #include "ast.h"
 
 	typedef TC::TC_Parser::token token;
 %}

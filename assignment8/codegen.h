@@ -1,10 +1,10 @@
-#ifndef __CODEGEN__
-#define __CODEGEN__
+#ifndef __CODEGEN_H__
+#define __CODEGEN_H__
 
 #include <vector>
 
-#include "tc_driver.hpp"
-#include "token.hpp"
+#include "tc_driver.h"
+#include "token.h"
 
 using namespace std;
 
@@ -15,6 +15,7 @@ class IFStatNode;
 class WHILEStatNode;
 class RETURNStatNode;
 class ExpressionList;
+class AssignExprNode;
 
 /*
  * codegenでコードを生成する
@@ -50,7 +51,10 @@ public:
   void ret_state_gen(RETURNStatNode *rsn);
 
   // exprのコード生成
-  void expr_gen(ExpressionList *epl);
+  void expr_list_gen(ExpressionList *epl);
+  void assign_expr_gen(AssignExprNode *aen);
+
+  void expr_gen(Node *n);
 
   // 論理演算式のコード生成
   //void logical_gen();
@@ -68,12 +72,13 @@ private:
   // ラベルを発行する関数
   string make_label();
 
-  TC::Token_Driver *token_driver;
   vector<string> code;
   int label;
   // このtop_allocの値がNlocalに埋め込まれる
   int top_alloc;
   // levelに対してそのlevelでのoffsetの最大値が返される
+  int create_temp_alloc() {return top_alloc+=4;}
+  void release_temp() {top_alloc-=4;}
 };
 
 #endif
