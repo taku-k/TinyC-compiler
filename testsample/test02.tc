@@ -1,6 +1,6 @@
-int f(int a){
-	if (a >>= 20) {
-		return 1;
+int f(int a, int b){
+	if (a == 3 && b == 4) {
+		return 5;
 	}
-	return 0;
+	return 6;
 }

@@ -135,5 +135,5 @@ void TC::TC_Driver::code_gen(const char *filename, bool flag) {
   }
 
   cg->code_generate(nodel);
-  cg->debug();
+  cg->release_code();
 }

@@ -538,15 +538,6 @@ AssignExprNode::AssignExprNode(Node *id, Node* node) {
 
 
 void AssignExprNode::PrintNode(std::ostream &os) {
-  // if (node_[0] != NULL) {
-  //   if (name_ == "") {
-  //     node_[0]->PrintNode();
-  //   } else {
-  //     std::cout << "(= " << name_ << " ";
-  //     node_[0]->PrintNode();
-  //     std::cout << ")";
-  //   }
-  // }
   if (node_[0] != NULL) {
     os << "(= ";
     node_[0]->PrintNode(os);
@@ -645,6 +636,7 @@ void UnaryNode::PrintNode(std::ostream &os) {
 FuncCallNode::FuncCallNode(Node *id, List *args) : Node() {
   node_[0] = id;
   list_ = args;
+  op_ = OP::FUNCCALL;
 
   token_driver->add_func_call_node(id->getname(), args->get_elems_size());
   // // 関数呼び出し時の引数チェックを行う
@@ -671,6 +663,8 @@ void FuncCallNode::PrintNode(std::ostream &os) {
   list_->PrintList(os);
   os << ")";
 }
+
+List *FuncCallNode::getlist() {return list_;}
 /*
  * FuncCallNode END
  */

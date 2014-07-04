@@ -28,7 +28,7 @@ class FuncCallNode;
 namespace OP{
   enum {
     FUNC, FUNCNODE, STATNODE, COMSTATNODE, IFSTATNODE, IFELSESTATNODE,WHILESTATNODE, RETNODE,INT, ID, OR, AND, EQUAL, NOTEQUAL, LESSEQUAL,
-     GREATEREQUAL, LESS, GREATER, ADD, SUB, MUL, DIV, MINUS, INTEGERNODE, DECLTYPENODE, RETSTATNODE, INTEGER
+     GREATEREQUAL, LESS, GREATER, ADD, SUB, MUL, DIV, MINUS, INTEGERNODE, DECLTYPENODE, RETSTATNODE, INTEGER, FUNCCALL
   };
 }
 
@@ -353,8 +353,10 @@ private:
 
 class FuncCallNode : public Node {
 public:
+  // [0] = IdentifierNode, list_ = FuncArgsList
   FuncCallNode(Node *id, List *args);
   void PrintNode(std::ostream &os);
+  List *getlist();
 private:
   List *list_;
 };

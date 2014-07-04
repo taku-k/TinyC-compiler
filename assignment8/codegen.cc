@@ -2,6 +2,8 @@
 #include <sstream>
 
 
+
+
 // intをstringに変換する関数
 string IntToString(int number)
 {
@@ -10,13 +12,7 @@ string IntToString(int number)
   return ss.str();
 }
 
-// int TC::Token_Driver::allocate_loc() {
-//   last_alloc -= 4;
-//   if (last_alloc < top_alloc) {
-//     top_alloc = last_alloc;
-//   }
-//   return last_alloc;
-// }
+
 
 // void TC::Token_Driver::release_loc(int cnt = 0) {
 //   if (cnt != 0) {
@@ -26,7 +22,7 @@ string IntToString(int number)
 //   }
 // }
 
-CodeGen::CodeGen(TC::Token_Driver *td, ostream *o) : label(0), out(o) {
+CodeGen::CodeGen(TC::Token_Driver *td, ostream *o) : out(o), label(0) {
 }
 
 void CodeGen::code_generate(NodeList *nl) {
@@ -44,7 +40,11 @@ void CodeGen::code_generate(NodeList *nl) {
 void CodeGen::func_decl_gen(FuncNode *fn) {
   string c = "";
   // top_allocセット
-  top_alloc = -(fn->get_count());
+  final_temp_alloc = top_alloc = -(fn->get_count());
+
+  // returnラベルの生成
+  ret_label = "Lret_" + fn->getnode(1)->getname();
+
   // fnのnode_[1] = IdentiferNode
   c = "\tGLOBAL\t" + fn->getnode(1)->getname();
   emit_code(c);
@@ -53,8 +53,8 @@ void CodeGen::func_decl_gen(FuncNode *fn) {
   c = "\tmov\tebp, esp";
   emit_code(c);
 
-  // TODO: 一時変数分のスタック領域をあけるようにする
-  c = "\tsub\tesp, " + IntToString(-(fn->get_count()));
+  // 挿入位置をマークしておく
+  c = "TEMP_ALLOC_CODE";
   emit_code(c);
 
   // top_allocを進ませる
@@ -63,14 +63,16 @@ void CodeGen::func_decl_gen(FuncNode *fn) {
   // 関数本体のコード
   state_list_gen((StatList *)(((ComStatNode *)(fn->getnode(3)))->get_list(1)));
 
-  // TODO: 関数のリターンラベル処理 （現在はLretのまま）
-  // c = "Lret_" + fn->getnode(1)->getname() + "\tmov\tesp, ebp";
-  c = "Lret\tmov\tesp, ebp";
+  c = ret_label + "\tmov\tesp, ebp";
+  // c = "Lret\tmov\tesp, ebp";
   emit_code(c);
   c = "\tpop\tebp";
   emit_code(c);
   c = "\tret";
   emit_code(c);
+
+  // 一時変数分確保する
+  insert_temp_alloc_code();
 }
 
 void CodeGen::state_list_gen(StatList *sl) {
@@ -136,11 +138,11 @@ void CodeGen::if_state_gen(IFStatNode *isn, bool isElse) {
 
     c = "\tjmp\t" + L2;
     emit_code(c);
-    // else節のコード生成
-    state_gen(isn->getnode(2));
 
     c = L1 + ":";
     emit_code(c);
+    // else節のコード生成
+    state_gen(isn->getnode(2));
 
     c = L2 + ":";
     emit_code(c);
@@ -152,6 +154,7 @@ void CodeGen::while_state_gen(WHILEStatNode *wsn) {
   string s = make_label();
   string e = make_label();
 
+  emit_code(s + ":");
   // 条件式コード生成
   expr_list_gen((ExpressionList *)(wsn->getnode(0)));
 
@@ -168,24 +171,17 @@ void CodeGen::while_state_gen(WHILEStatNode *wsn) {
 
 }
 
-// TODO: リターンラベルを組み込む
+
 void CodeGen::ret_state_gen(RETURNStatNode *rsn) {
   string c;
   // 式の計算コード生成
   expr_list_gen((ExpressionList *)(rsn->getnode(0)));
 
-  c = "\tjmp\tLret";
+  c = "\tjmp\t" + ret_label;
   emit_code(c);
 }
 
-void CodeGen::emit_code(string c) {
-  code.push_back(c);
-}
 
-string CodeGen::make_label() {
-  string ret = "L" + IntToString(label++);
-  return ret;
-}
 
 void CodeGen::expr_list_gen(ExpressionList *epl) {
   string c;
@@ -221,7 +217,7 @@ void CodeGen::expr_gen(Node *n) {
   int tmp;
   switch(op) {
 
-    case(OP::ADD):
+    case OP::ADD:
       expr_gen(n->getnode(1));
       c = "\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "], eax";
       emit_code(c);
@@ -232,7 +228,7 @@ void CodeGen::expr_gen(Node *n) {
       break;
 
 
-    case(OP::SUB):
+    case OP::SUB:
       expr_gen(n->getnode(1));
       c = "\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "], eax";
       emit_code(c);
@@ -243,7 +239,7 @@ void CodeGen::expr_gen(Node *n) {
       break;
 
 
-    case(OP::MUL):
+    case OP::MUL:
       expr_gen(n->getnode(1));
       c = "\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "], eax";
       emit_code(c);
@@ -254,7 +250,7 @@ void CodeGen::expr_gen(Node *n) {
       break;
 
 
-    case(OP::DIV):
+    case OP::DIV:
       expr_gen(n->getnode(1));
       c = "\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "], eax";
       emit_code(c);
@@ -266,7 +262,7 @@ void CodeGen::expr_gen(Node *n) {
       release_temp();
       break;
 
-    case(OP::GREATEREQUAL):
+    case OP::GREATEREQUAL:
       expr_gen(n->getnode(1));
       c = "\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "], eax";
       emit_code(c);
@@ -281,7 +277,7 @@ void CodeGen::expr_gen(Node *n) {
       break;
 
 
-    case(OP::LESSEQUAL):
+    case OP::LESSEQUAL:
       expr_gen(n->getnode(1));
       c = "\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "], eax";
       emit_code(c);
@@ -295,7 +291,7 @@ void CodeGen::expr_gen(Node *n) {
       release_temp();
       break;
 
-    case(OP::EQUAL):
+    case OP::EQUAL:
       expr_gen(n->getnode(1));
       c = "\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "], eax";
       emit_code(c);
@@ -310,7 +306,7 @@ void CodeGen::expr_gen(Node *n) {
       break;
 
 
-    case(OP::NOTEQUAL):
+    case OP::NOTEQUAL:
       expr_gen(n->getnode(1));
       c = "\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "], eax";
       emit_code(c);
@@ -325,7 +321,7 @@ void CodeGen::expr_gen(Node *n) {
       break;
 
 
-    case(OP::LESS):
+    case OP::LESS:
       expr_gen(n->getnode(1));
       c = "\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "], eax";
       emit_code(c);
@@ -340,7 +336,7 @@ void CodeGen::expr_gen(Node *n) {
       break;
 
 
-    case(OP::GREATER):
+    case OP::GREATER:
       expr_gen(n->getnode(1));
       c = "\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "], eax";
       emit_code(c);
@@ -355,7 +351,7 @@ void CodeGen::expr_gen(Node *n) {
       break;
 
 
-    case(OP::OR):
+    case OP::OR:
       label = make_label();
       c = "\tmov\tdword [ebp-" + IntToString(tmp=create_temp_alloc()) + "], 0";
       emit_code(c);
@@ -376,7 +372,7 @@ void CodeGen::expr_gen(Node *n) {
       emit_code(c);
       break;
 
-    case(OP::AND):
+    case OP::AND:
       label = make_label();
       c = "\tmov\tdword [ebp-" + IntToString(tmp=create_temp_alloc()) + "], 1";
       emit_code(c);
@@ -397,7 +393,7 @@ void CodeGen::expr_gen(Node *n) {
       emit_code(c);
       break;
 
-    case(OP::ID):
+    case OP::ID:
       in = (IdentifierNode *)n;
       c = "\tmov\teax, [ebp";
       if (in->get_offset_from_node() > 0) {
@@ -407,19 +403,68 @@ void CodeGen::expr_gen(Node *n) {
       emit_code(c);
       break;
 
-    case(OP::INTEGER):
+    case OP::INTEGER:
       c = "\tmov\teax, ";
       c += IntToString(n->getvalue());
       emit_code(c);
       break;
+
+    case OP::FUNCCALL:
+      func_call_gen((FuncCallNode *)n);
+      break;
   }
 }
 
-// void CodeGen::emit_label() {
-// }
+void CodeGen::func_call_gen(FuncCallNode *fcn) {
+  IdentifierNode *id = (IdentifierNode *)(fcn->getnode(0));
+  FuncArgsList *args = (FuncArgsList *)(fcn->getlist());
 
-void CodeGen::debug() {
+  // UNDEFFUNならば
+  if (id->get_token_info()->get_kind() == TC::TkInfo::UNDEFFUN) {
+    emit_code("EXTERN\t" + id->getname());
+  }
+
+  // 引数をスタックに積んでいく.
+  for (int i = args->get_elems_size()-1; i >= 0 ; i--) {
+    assign_expr_gen( ( AssignExprNode * )(args->get_elems_node(i)) );
+    emit_code("\tpush\teax");
+  }
+  emit_code("\tcall\t" + id->getname());
+}
+
+
+
+
+// コード出力関係
+void CodeGen::emit_code(string c) {
+  code.push_back(c);
+}
+
+string CodeGen::make_label() {
+  string ret = "L" + IntToString(label++);
+  return ret;
+}
+
+void CodeGen::release_code() {
   for (int i = 0; i < code.size(); i++) {
     (*out) << code[i] << endl;
+  }
+}
+
+
+int CodeGen::create_temp_alloc() {
+  top_alloc+=4;
+  if (top_alloc > final_temp_alloc) {
+    final_temp_alloc = top_alloc;
+  }
+  return top_alloc;
+}
+
+void CodeGen::insert_temp_alloc_code() {
+  // 最新の関数に対して行う必要があるので末尾から探索する
+  for (int i = code.size() - 1; i >= 0; i--) {
+    if (code[i] == "TEMP_ALLOC_CODE") {
+      code[i] = "\tsub\tesp, " + IntToString(final_temp_alloc);
+    }
   }
 }

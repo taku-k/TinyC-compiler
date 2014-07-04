@@ -16,6 +16,7 @@ class WHILEStatNode;
 class RETURNStatNode;
 class ExpressionList;
 class AssignExprNode;
+class FuncCallNode;
 
 /*
  * codegenでコードを生成する
@@ -56,15 +57,11 @@ public:
 
   void expr_gen(Node *n);
 
-  // 論理演算式のコード生成
-  //void logical_gen();
-
   // 関数呼び出しコード生成
-  //void func_call_gen();
+  void func_call_gen(FuncCallNode *fcn);
 
-  
+  void release_code();
 
-  void debug();
 private:
   // コードを発行する関数
   void emit_code(string c);
@@ -75,13 +72,25 @@ private:
   // 出力用stream
   ostream *out;
 
+  // コード全体を配列で保持する
   vector<string> code;
+
+  // return文用のラベル
+  string ret_label;
+
+  // labelの数を保持
   int label;
+
   // このtop_allocの値がNlocalに埋め込まれる
   int top_alloc;
+  int final_temp_alloc;
+
   // levelに対してそのlevelでのoffsetの最大値が返される
-  int create_temp_alloc() {return top_alloc+=4;}
+  int create_temp_alloc();
   void release_temp() {top_alloc-=4;}
+
+  // 一時変数分の領域を確保するコードを挿入する関数
+  void insert_temp_alloc_code();
 };
 
 #endif
