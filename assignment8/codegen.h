@@ -17,6 +17,7 @@ class RETURNStatNode;
 class ExpressionList;
 class AssignExprNode;
 class FuncCallNode;
+class DeclTypeNode;
 
 /*
  * codegenでコードを生成する
@@ -34,6 +35,9 @@ public:
 
   // 最初に呼ばれる関数
   void code_generate(NodeList *nl);
+
+  // 大域変数の宣言
+  void external_decl_gen(DeclTypeNode *dtn);
 
   // 関数定義のコード生成  
   void func_decl_gen(FuncNode *fn);

@@ -1,0 +1,11 @@
+int test_code() {
+	int check;
+	int tmp;
+	check = 1;
+
+	tmp = 8 | 4 | 2 | 1;
+	if (tmp != 15) {
+		check = 0;
+	}
+	return check;
+}

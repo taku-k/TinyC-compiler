@@ -439,6 +439,7 @@ void StatNode::PrintNode(std::ostream &os) {
 ExpressionList::ExpressionList(Node* node, Node* list) {
   node_[0] = node;
   node_[1] = list;
+  op_ = OP::EXPRESSION;
 }
 
 void ExpressionList::PrintNode(std::ostream &os) {
@@ -613,7 +614,7 @@ void ExprNode::PrintNode(std::ostream &os) {
  * UnaryNode
  */
 UnaryNode::UnaryNode(const int op, Node *node) : Node() {
-  op_ = op;
+  op_ = OP::UNARY;
   node_[0] = node;
 }
 

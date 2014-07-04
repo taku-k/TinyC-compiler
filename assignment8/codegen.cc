@@ -28,12 +28,23 @@ CodeGen::CodeGen(TC::Token_Driver *td, ostream *o) : out(o), label(0) {
 void CodeGen::code_generate(NodeList *nl) {
   for (int i = 0; i < nl->get_size(); i++) {
     switch(nl->get_node(i)->get_type()) {
-      case(OP::FUNCNODE):
-        func_decl_gen((FuncNode*)(nl->get_node(i)));
+      case OP::FUNCNODE:
+        func_decl_gen( (FuncNode *)(nl->get_node(i)) );
         break;
-      default:
+      case OP::DECLTYPENODE:
+        external_decl_gen( (DeclTypeNode *)(nl->get_node(i)) );
         break;
     }
+  }
+}
+
+
+void CodeGen::external_decl_gen(DeclTypeNode *dtn) {
+  DeclList *dl = (DeclList *)(dtn->getlist());
+
+  for (int i = 0; i < dl->get_elems_size(); i++) {
+    IdentifierNode *id = (IdentifierNode *)(dl->get_elems_node(i));
+    emit_code("\tCOMMON\t" + id->getname() + " " + IntToString(4));
   }
 }
 
@@ -199,12 +210,18 @@ void CodeGen::assign_expr_gen(AssignExprNode *aen) {
     assign_expr_gen((AssignExprNode *)(aen->getnode(1)));
     // 指定の番地に値を戻す
     IdentifierNode *n = (IdentifierNode *)(aen->getnode(0));
-    c = "\tmov\t[ebp";
-    if (n->get_offset_from_node() > 0) {
-      c += "+";
+
+    // 大域変数の場合
+    if (n->get_token_info()->get_lev() == 0) {
+      emit_code("\tmov\t[" + n->getname() + "], eax");
+    } else {
+      c = "\tmov\t[ebp";
+      if (n->get_offset_from_node() > 0) {
+        c += "+";
+      }
+      c += IntToString(n->get_offset_from_node()) + "], eax";
+      emit_code(c);
     }
-    c += IntToString(n->get_offset_from_node()) + "], eax";
-    emit_code(c);
   } else {
     expr_gen(aen->getnode(1));
   }
@@ -259,6 +276,32 @@ void CodeGen::expr_gen(Node *n) {
       emit_code(c);
       c = "\tidiv\tdword [ebp-" + IntToString(tmp) + "]";
       emit_code(c);
+      release_temp();
+      break;
+
+    case OP::BITOR:
+      expr_gen(n->getnode(1));
+      c = "\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "], eax";
+      emit_code(c);
+      expr_gen(n->getnode(0));
+      c = "\tor\teax, [ebp-" + IntToString(tmp) + "]";
+      emit_code(c);
+      release_temp();
+      break;
+
+    case OP::BITXOR:
+      expr_gen(n->getnode(1));
+      emit_code("\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "], eax");
+      expr_gen(n->getnode(0));
+      emit_code("\txor\teax, [ebp-" + IntToString(tmp) + "]");
+      release_temp();
+      break;
+
+    case OP::BITAND:
+      expr_gen(n->getnode(1));
+      emit_code("\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "], eax");
+      expr_gen(n->getnode(0));
+      emit_code("\tand\teax, [ebp-" + IntToString(tmp) + "]");
       release_temp();
       break;
 
@@ -395,12 +438,16 @@ void CodeGen::expr_gen(Node *n) {
 
     case OP::ID:
       in = (IdentifierNode *)n;
-      c = "\tmov\teax, [ebp";
-      if (in->get_offset_from_node() > 0) {
-        c += "+";
+      if (in->get_token_info()->get_lev() == 0) {
+        emit_code("\tmov\teax, [" + in->getname() + "]");
+      } else {
+        c = "\tmov\teax, [ebp";
+        if (in->get_offset_from_node() > 0) {
+          c += "+";
+        }
+        c += IntToString(in->get_offset_from_node()) + "]";
+        emit_code(c);
       }
-      c += IntToString(in->get_offset_from_node()) + "]";
-      emit_code(c);
       break;
 
     case OP::INTEGER:
@@ -411,6 +458,15 @@ void CodeGen::expr_gen(Node *n) {
 
     case OP::FUNCCALL:
       func_call_gen((FuncCallNode *)n);
+      break;
+
+    case OP::UNARY:
+      expr_gen(n->getnode(0));
+      emit_code("\timul\teax, -1");
+      break;
+
+    case OP::EXPRESSION:
+      expr_list_gen( (ExpressionList *)n );
       break;
   }
 }

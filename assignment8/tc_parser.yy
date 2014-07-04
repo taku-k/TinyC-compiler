@@ -80,6 +80,9 @@
 %type <node> Identifier
 %type <node> func_def_declarator
 %type <node> func_call_identifier
+%type <node> bit_or_expr
+%type <node> bit_xor_expr
+%type <node> bit_and_expr
 
 
 %destructor { if ($$)  { delete ($$); ($$) = NULL; } } <id>
@@ -185,8 +188,20 @@ logical_OR_expr             : logical_AND_expr                            { $$ =
                             | logical_OR_expr T_Or logical_AND_expr       { $$ = new ExprNode($2, $1, $3); }
                             ;
 
-logical_AND_expr            : equality_expr                               { $$ = $1; }
-                            | logical_AND_expr T_And equality_expr        { $$ = new ExprNode($2, $1, $3); }
+logical_AND_expr            : bit_or_expr                                 { $$ = $1; }
+                            | logical_AND_expr T_And bit_or_expr          { $$ = new ExprNode($2, $1, $3); }
+                            ;
+
+bit_or_expr                 : bit_xor_expr                                { $$ = $1; }
+                            | bit_or_expr '|' bit_xor_expr                { $$ = new ExprNode(OP::BITOR, $1, $3); }
+                            ;
+
+bit_xor_expr                : bit_and_expr                                { $$ = $1; }
+                            | bit_xor_expr '^' bit_and_expr               { $$ = new ExprNode(OP::BITXOR, $1, $3); }
+                            ;
+
+bit_and_expr                : equality_expr                               { $$ = $1; }
+                            | bit_and_expr '&' equality_expr              { $$ = new ExprNode(OP::BITAND, $1, $3); }
                             ;
 
 equality_expr               : relational_expr                             { $$ = $1; }
@@ -241,5 +256,5 @@ Identifier                  : Id                                          { $$ =
 
 %%
 void TC::TC_Parser::error(const std::string &m) {
-  std::cerr << "Error: " << m << std::endl;
+  std::cerr << "Parser Error: " << m << std::endl;
 }
