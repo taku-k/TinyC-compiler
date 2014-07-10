@@ -109,8 +109,14 @@ void TC::TC_Driver::func_args_check() {
 
     for (int fl_i = 0; fl_i < fl.size(); fl_i++) {
       TkInfo *ti = fl[fl_i];
+
+
       // 同名の関数を見つけた場合
       if (ti->get_id() == id && ti->get_lev() == 0) {
+        // それが未定義関数の場合スルー
+        if (ti->get_kind() == TC::TkInfo::UNDEFFUN) {
+          break;
+        }
         // 引数の数をチェックする
         // 引数が少ない場合
         if (ti->get_offset() > args_size) {

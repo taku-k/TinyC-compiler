@@ -19,6 +19,21 @@ class AssignExprNode;
 class FuncCallNode;
 class DeclTypeNode;
 
+
+// 一行のコード情報を管理するクラス
+class Code {
+public:
+  Code(string tag0, string tag1="", string tag2="", bool flag = false);
+  ~Code() {};
+  string form_code();
+  string get_tag(int num);
+  bool is_label();
+private:
+  bool label_flag;
+  string tag[3];
+};
+
+
 /*
  * codegenでコードを生成する
  *
@@ -64,14 +79,21 @@ public:
   // 関数呼び出しコード生成
   void func_call_gen(FuncCallNode *fcn);
 
+  void general_expr_gen(string expr, Node *n);
+
+  void general_cmp_gen(string cmp, Node *n);
+
+  void general_logical_gen(string logical, Node *n);
 
   // コードを出力ストリームに流す
   // この時同時にコードの最適化関数を呼び出す
   void release_code();
 
+
 private:
   // コードを発行する関数
-  void emit_code(string c);
+  void emit_code(Code *c);
+  // void emit_code(string tag0, string tag1, string tag2, bool flag = false);
 
   // ラベルを発行する関数
   string make_label();
@@ -80,7 +102,8 @@ private:
   ostream *out;
 
   // コード全体を配列で保持する
-  vector<string> code;
+  // vector<string> code;
+  vector<Code *> codes;
 
   // return文用のラベル
   string ret_label;
@@ -102,8 +125,8 @@ private:
   // コード最適化関数
   void optimize_code();
 
-  // 
-
 };
+
+
 
 #endif
