@@ -112,8 +112,8 @@ void TC::TC_Driver::func_args_check() {
     for (int fl_i = 0; fl_i < fl.size(); fl_i++) {
       TkInfo *ti = fl[fl_i];
 
-      if (ti->get_offset() == TC::TkInfo::UNDEFFUN) {
-        continue;
+      if (ti->get_kind() == TC::TkInfo::UNDEFFUN) {
+        break;
       }
       // 同名の関数でかつグローバル領域にあるものを見つけた場合
       if (ti->get_id() == id && ti->get_lev() == 0) {
