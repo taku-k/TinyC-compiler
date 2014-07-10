@@ -486,6 +486,8 @@ void CodeGen::func_call_gen(FuncCallNode *fcn) {
     emit_code("\tpush\teax");
   }
   emit_code("\tcall\t" + id->getname());
+  // スタックポイントを戻しておく
+  emit_code("\tadd\tesp," + IntToString(4 * args->get_elems_size()));
 }
 
 
