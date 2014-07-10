@@ -159,7 +159,7 @@ public:
 
   // elemsの要素一つずつにPrintNodeを呼び出していく
   virtual void PrintList(std::ostream &os) {
-    for (int i = 0; i < elems.size(); i++) {
+    for (int i = 0; i < (int)elems.size(); i++) {
       if (elems[i] != NULL) {
         elems[i]->PrintNode(os);
       }

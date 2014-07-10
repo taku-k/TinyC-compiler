@@ -64,6 +64,9 @@ public:
   // 関数呼び出しコード生成
   void func_call_gen(FuncCallNode *fcn);
 
+
+  // コードを出力ストリームに流す
+  // この時同時にコードの最適化関数を呼び出す
   void release_code();
 
 private:
@@ -95,6 +98,12 @@ private:
 
   // 一時変数分の領域を確保するコードを挿入する関数
   void insert_temp_alloc_code();
+
+  // コード最適化関数
+  void optimize_code();
+
+  // 
+
 };
 
 #endif

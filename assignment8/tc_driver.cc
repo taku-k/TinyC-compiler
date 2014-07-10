@@ -98,6 +98,7 @@ void TC::TC_Driver::warn(const char *fmt, ...)
 // 関数呼び出しの引数チェック関数
 // token.hppから関数呼び出しのリストとidlistよを取得してくる
 // その２つのoffsetを照らしあわせてチェックする
+// ただし未定義関数の場合は飛ばす
 void TC::TC_Driver::func_args_check() {
   std::vector<std::pair<std::string, int> > cl = t_driver->get_func_call_list();
   std::deque<TkInfo *> fl = t_driver->get_id_list();
@@ -107,9 +108,14 @@ void TC::TC_Driver::func_args_check() {
     int args_size = cl[cl_i].second;
     // std::cout << id << " " << args_size << std::endl;
 
+
     for (int fl_i = 0; fl_i < fl.size(); fl_i++) {
       TkInfo *ti = fl[fl_i];
-      // 同名の関数を見つけた場合
+
+      if (ti->get_offset() == TC::TkInfo::UNDEFFUN) {
+        continue;
+      }
+      // 同名の関数でかつグローバル領域にあるものを見つけた場合
       if (ti->get_id() == id && ti->get_lev() == 0) {
         // 引数の数をチェックする
         // 引数が少ない場合

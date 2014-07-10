@@ -44,12 +44,11 @@ void CodeGen::external_decl_gen(DeclTypeNode *dtn) {
 
   for (int i = 0; i < dl->get_elems_size(); i++) {
     IdentifierNode *id = (IdentifierNode *)(dl->get_elems_node(i));
-    emit_code("\tCOMMON\t" + id->getname() + " " + IntToString(4));
+    emit_code("\tCOMMON\t" + id->getname() + "\t" + IntToString(4));
   }
 }
 
 void CodeGen::func_decl_gen(FuncNode *fn) {
-  string c = "";
   // top_allocセット
   final_temp_alloc = top_alloc = -(fn->get_count());
 
@@ -57,16 +56,13 @@ void CodeGen::func_decl_gen(FuncNode *fn) {
   ret_label = "Lret_" + fn->getnode(1)->getname();
 
   // fnのnode_[1] = IdentiferNode
-  c = "\tGLOBAL\t" + fn->getnode(1)->getname();
-  emit_code(c);
-  c = fn->getnode(1)->getname() + "\tpush\tebp";
-  emit_code(c);
-  c = "\tmov\tebp, esp";
-  emit_code(c);
+  emit_code("\tGLOBAL\t" + fn->getnode(1)->getname());
+  emit_code(fn->getnode(1)->getname() + ":");
+  emit_code("\tpush\tebp");
+  emit_code("\tmov\tebp,esp");
 
   // 挿入位置をマークしておく
-  c = "TEMP_ALLOC_CODE";
-  emit_code(c);
+  emit_code("TEMP_ALLOC_CODE");
 
   // top_allocを進ませる
   // up_top_alloc
@@ -74,13 +70,10 @@ void CodeGen::func_decl_gen(FuncNode *fn) {
   // 関数本体のコード
   state_list_gen((StatList *)(((ComStatNode *)(fn->getnode(3)))->get_list(1)));
 
-  c = ret_label + "\tmov\tesp, ebp";
-  // c = "Lret\tmov\tesp, ebp";
-  emit_code(c);
-  c = "\tpop\tebp";
-  emit_code(c);
-  c = "\tret";
-  emit_code(c);
+  emit_code(ret_label + ":");
+  emit_code("\tmov\tesp,ebp");
+  emit_code("\tpop\tebp");
+  emit_code("\tret");
 
   // 一時変数分確保する
   insert_temp_alloc_code();
@@ -119,49 +112,38 @@ void CodeGen::state_gen(Node *n) {
 }
 
 void CodeGen::if_state_gen(IFStatNode *isn, bool isElse) {
-  string c, L1, L2;
+  string L1, L2;
   L1 = make_label();
   if (isElse == false) {
     // else節が存在しないならば
     //条件式コードの生成 結果が偽ならばl1にジャンプ
     expr_list_gen((ExpressionList *)(isn->getnode(0)));
 
-    c = "\tcmp\teax, 0";
-    emit_code(c);
-    c = "\tje\t" + L1;
-    emit_code(c);
+    emit_code("\tcmp\teax,0");
+    emit_code("\tje\t" + L1);
     //本体コードの生成
     state_gen(isn->getnode(1));
-
     emit_code(L1 + ":");
+
   } else {
     // else節が存在するならば 
     L2 = make_label();
     // 条件式コードの生成 結果が偽ならばL1へジャンプ
     expr_list_gen((ExpressionList *)(isn->getnode(0)));
 
-    c = "\tcmp\teax, 0";
-    emit_code(c);
-    c = "\tje\t" + L1;
-    emit_code(c);
+    emit_code("\tcmp\teax,0");
+    emit_code("\tje\t" + L1);
     // if節のコード生成
     state_gen(isn->getnode(1));
-
-    c = "\tjmp\t" + L2;
-    emit_code(c);
-
-    c = L1 + ":";
-    emit_code(c);
+    emit_code("\tjmp\t" + L2);
+    emit_code(L1 + ":");
     // else節のコード生成
     state_gen(isn->getnode(2));
-
-    c = L2 + ":";
-    emit_code(c);
+    emit_code(L2 + ":");
   }
 }
 
 void CodeGen::while_state_gen(WHILEStatNode *wsn) {
-  string c;
   string s = make_label();
   string e = make_label();
 
@@ -169,33 +151,27 @@ void CodeGen::while_state_gen(WHILEStatNode *wsn) {
   // 条件式コード生成
   expr_list_gen((ExpressionList *)(wsn->getnode(0)));
 
-  c = "\tcmp\teax, 0";
-  emit_code(c);
-  c = "\tje\t" + e;
-  emit_code(c);
+  emit_code("\tcmp\teax,0");
+  emit_code("\tje\t" + e);
   // 本体のコード生成
   state_gen(wsn->getnode(1));
 
-  c = "\tjmp\t" + s;
-  emit_code(c);
+  emit_code("\tjmp\t" + s);
   emit_code(e + ":");
 
 }
 
 
 void CodeGen::ret_state_gen(RETURNStatNode *rsn) {
-  string c;
   // 式の計算コード生成
   expr_list_gen((ExpressionList *)(rsn->getnode(0)));
 
-  c = "\tjmp\t" + ret_label;
-  emit_code(c);
+  emit_code("\tjmp\t" + ret_label);
 }
 
 
 
 void CodeGen::expr_list_gen(ExpressionList *epl) {
-  string c;
   assign_expr_gen((AssignExprNode *)(epl->getnode(0)));
   if (epl->getnode(1) != NULL) {
     expr_list_gen((ExpressionList *)(epl->getnode(1)));
@@ -213,13 +189,13 @@ void CodeGen::assign_expr_gen(AssignExprNode *aen) {
 
     // 大域変数の場合
     if (n->get_token_info()->get_lev() == 0) {
-      emit_code("\tmov\t[" + n->getname() + "], eax");
+      emit_code("\tmov\t[" + n->getname() + "],eax");
     } else {
       c = "\tmov\t[ebp";
       if (n->get_offset_from_node() > 0) {
         c += "+";
       }
-      c += IntToString(n->get_offset_from_node()) + "], eax";
+      c += IntToString(n->get_offset_from_node()) + "],eax";
       emit_code(c);
     }
   } else {
@@ -236,204 +212,155 @@ void CodeGen::expr_gen(Node *n) {
 
     case OP::ADD:
       expr_gen(n->getnode(1));
-      c = "\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "], eax";
-      emit_code(c);
+      emit_code("\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "],eax");
       expr_gen(n->getnode(0));
-      c = "\tadd\teax, [ebp-" + IntToString(tmp) + "]";
-      emit_code(c);
+      emit_code("\tadd\teax,[ebp-" + IntToString(tmp) + "]");
       release_temp();
       break;
 
 
     case OP::SUB:
       expr_gen(n->getnode(1));
-      c = "\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "], eax";
-      emit_code(c);
+      emit_code("\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "],eax");
       expr_gen(n->getnode(0));
-      c = "\tsub\teax, [ebp-" + IntToString(tmp) + "]";
-      emit_code(c);
+      emit_code("\tsub\teax,[ebp-" + IntToString(tmp) + "]");
       release_temp();
       break;
 
 
     case OP::MUL:
       expr_gen(n->getnode(1));
-      c = "\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "], eax";
-      emit_code(c);
+      emit_code("\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "],eax");
       expr_gen(n->getnode(0));
-      c = "\timul\teax, [ebp-" + IntToString(tmp) + "]";
-      emit_code(c);
+      emit_code("\timul\teax,[ebp-" + IntToString(tmp) + "]");
       release_temp();
       break;
 
 
     case OP::DIV:
       expr_gen(n->getnode(1));
-      c = "\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "], eax";
-      emit_code(c);
+      emit_code("\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "],eax");
       expr_gen(n->getnode(0));
-      c = "\tcdq";
-      emit_code(c);
-      c = "\tidiv\tdword [ebp-" + IntToString(tmp) + "]";
-      emit_code(c);
+      emit_code("\tcdq");
+      emit_code("\tidiv\tdword [ebp-" + IntToString(tmp) + "]");
       release_temp();
       break;
 
     case OP::BITOR:
       expr_gen(n->getnode(1));
-      c = "\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "], eax";
-      emit_code(c);
+      emit_code("\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "],eax");
       expr_gen(n->getnode(0));
-      c = "\tor\teax, [ebp-" + IntToString(tmp) + "]";
-      emit_code(c);
+      emit_code("\tor\teax,[ebp-" + IntToString(tmp) + "]");
       release_temp();
       break;
 
     case OP::BITXOR:
       expr_gen(n->getnode(1));
-      emit_code("\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "], eax");
+      emit_code("\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "],eax");
       expr_gen(n->getnode(0));
-      emit_code("\txor\teax, [ebp-" + IntToString(tmp) + "]");
+      emit_code("\txor\teax,[ebp-" + IntToString(tmp) + "]");
       release_temp();
       break;
 
     case OP::BITAND:
       expr_gen(n->getnode(1));
-      emit_code("\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "], eax");
+      emit_code("\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "],eax");
       expr_gen(n->getnode(0));
-      emit_code("\tand\teax, [ebp-" + IntToString(tmp) + "]");
+      emit_code("\tand\teax,[ebp-" + IntToString(tmp) + "]");
       release_temp();
       break;
 
     case OP::GREATEREQUAL:
       expr_gen(n->getnode(1));
-      c = "\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "], eax";
-      emit_code(c);
+      emit_code("\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "],eax");
       expr_gen(n->getnode(0));
-      c = "\tcmp\teax, [ebp-" + IntToString(tmp) + "]";
-      emit_code(c);
-      c = "\tsetge\tal";
-      emit_code(c);
-      c = "\tmovzx\teax, al";
-      emit_code(c);
+      emit_code("\tcmp\teax,[ebp-" + IntToString(tmp) + "]");
+      emit_code("\tsetge\tal");
+      emit_code("\tmovzx\teax,al");
       release_temp();
       break;
 
 
     case OP::LESSEQUAL:
       expr_gen(n->getnode(1));
-      c = "\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "], eax";
-      emit_code(c);
+      emit_code("\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "],eax");
       expr_gen(n->getnode(0));
-      c = "\tcmp\teax, [ebp-" + IntToString(tmp) + "]";
-      emit_code(c);
-      c = "\tsetle\tal";
-      emit_code(c);
-      c = "\tmovzx\teax, al";
-      emit_code(c);
+      emit_code("\tcmp\teax,[ebp-" + IntToString(tmp) + "]");
+      emit_code("\tsetle\tal");
+      emit_code("\tmovzx\teax,al");
       release_temp();
       break;
 
     case OP::EQUAL:
       expr_gen(n->getnode(1));
-      c = "\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "], eax";
-      emit_code(c);
+      emit_code("\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "],eax");
       expr_gen(n->getnode(0));
-      c = "\tcmp\teax, [ebp-" + IntToString(tmp) + "]";
-      emit_code(c);
-      c = "\tsete\tal";
-      emit_code(c);
-      c = "\tmovzx\teax, al";
-      emit_code(c);
+      emit_code("\tcmp\teax,[ebp-" + IntToString(tmp) + "]");
+      emit_code("\tsete\tal");
+      emit_code("\tmovzx\teax,al");
       release_temp();
       break;
 
 
     case OP::NOTEQUAL:
       expr_gen(n->getnode(1));
-      c = "\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "], eax";
-      emit_code(c);
+      emit_code("\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "],eax");
       expr_gen(n->getnode(0));
-      c = "\tcmp\teax, [ebp-" + IntToString(tmp) + "]";
-      emit_code(c);
-      c = "\tsetne\tal";
-      emit_code(c);
-      c = "\tmovzx\teax, al";
-      emit_code(c);
+      emit_code("\tcmp\teax,[ebp-" + IntToString(tmp) + "]");
+      emit_code("\tsetne\tal");
+      emit_code("\tmovzx\teax,al");
       release_temp();
       break;
 
 
     case OP::LESS:
       expr_gen(n->getnode(1));
-      c = "\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "], eax";
-      emit_code(c);
+      emit_code("\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "],eax");
       expr_gen(n->getnode(0));
-      c = "\tcmp\teax, [ebp-" + IntToString(tmp) + "]";
-      emit_code(c);
-      c = "\tsetl\tal";
-      emit_code(c);
-      c = "\tmovzx\teax, al";
-      emit_code(c);
+      emit_code("\tcmp\teax,[ebp-" + IntToString(tmp) + "]");
+      emit_code("\tsetl\tal");
+      emit_code("\tmovzx\teax,al");
       release_temp();
       break;
 
 
     case OP::GREATER:
       expr_gen(n->getnode(1));
-      c = "\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "], eax";
-      emit_code(c);
+      emit_code("\tmov\t[ebp-" + IntToString(tmp=create_temp_alloc()) + "],eax");
       expr_gen(n->getnode(0));
-      c = "\tcmp\teax, [ebp-" + IntToString(tmp) + "]";
-      emit_code(c);
-      c = "\tsetg\tal";
-      emit_code(c);
-      c = "\tmovzx\teax, al";
-      emit_code(c);
+      emit_code("\tcmp\teax,[ebp-" + IntToString(tmp) + "]");
+      emit_code("\tsetg\tal");
+      emit_code("\tmovzx\teax,al");
       release_temp();
       break;
 
 
     case OP::OR:
       label = make_label();
-      c = "\tmov\tdword [ebp-" + IntToString(tmp=create_temp_alloc()) + "], 0";
-      emit_code(c);
+      emit_code("\tmov\tdword [ebp-" + IntToString(tmp=create_temp_alloc()) + "],0");
       expr_gen(n->getnode(0));
-      c = "\tcmp\teax, 0";
-      emit_code(c);
-      c = "\tje\t" + label;
-      emit_code(c);
+      emit_code("\tcmp\teax,0");
+      emit_code("\tje\t" + label);
       expr_gen(n->getnode(1));
-      c = "\tcmp\teax, 0";
-      emit_code(c);
-      c = "\tje\t" + label;
-      emit_code(c);
-      c = "\tmov\tdword [ebp-" + IntToString(tmp) + "], 1";
-      emit_code(c);
+      emit_code("\tcmp\teax,0");
+      emit_code("\tje\t" + label);
+      emit_code("\tmov\tdword [ebp-" + IntToString(tmp) + "],1");
       emit_code(label + ":");
-      c = "\tmov\teax, [ebp-" + IntToString(tmp) + "]";
-      emit_code(c);
+      emit_code("\tmov\teax,[ebp-" + IntToString(tmp) + "]");
       break;
 
     case OP::AND:
       label = make_label();
-      c = "\tmov\tdword [ebp-" + IntToString(tmp=create_temp_alloc()) + "], 1";
-      emit_code(c);
+      emit_code("\tmov\tdword [ebp-" + IntToString(tmp=create_temp_alloc()) + "],1");
       expr_gen(n->getnode(0));
-      c = "\tcmp\teax, 0";
-      emit_code(c);
-      c = "\tjne\t" + label;
-      emit_code(c);
+      emit_code("\tcmp\teax,0");
+      emit_code("\tjne\t" + label);
       expr_gen(n->getnode(1));
-      c = "\tcmp\teax, 0";
-      emit_code(c);
-      c = "\tjne\t" + label;
-      emit_code(c);
-      c = "\tmov\tdword [ebp-" + IntToString(tmp) + "], 0";
-      emit_code(c);
+      emit_code("\tcmp\teax,0");
+      emit_code("\tjne\t" + label);
+      emit_code("\tmov\tdword [ebp-" + IntToString(tmp) + "],0");
       emit_code(label + ":");
-      c = "\tmov\teax, [ebp-" + IntToString(tmp) + "]";
-      emit_code(c);
+      emit_code("\tmov\teax,[ebp-" + IntToString(tmp) + "]");
       break;
 
     case OP::ID:
@@ -451,9 +378,7 @@ void CodeGen::expr_gen(Node *n) {
       break;
 
     case OP::INTEGER:
-      c = "\tmov\teax, ";
-      c += IntToString(n->getvalue());
-      emit_code(c);
+      emit_code("\tmov\teax," + IntToString(n->getvalue()));
       break;
 
     case OP::FUNCCALL:
@@ -502,6 +427,8 @@ string CodeGen::make_label() {
 }
 
 void CodeGen::release_code() {
+  // 出力する前に最適化を行う
+  optimize_code();
   for (int i = 0; i < code.size(); i++) {
     (*out) << code[i] << endl;
   }
@@ -520,7 +447,13 @@ void CodeGen::insert_temp_alloc_code() {
   // 最新の関数に対して行う必要があるので末尾から探索する
   for (int i = code.size() - 1; i >= 0; i--) {
     if (code[i] == "TEMP_ALLOC_CODE") {
-      code[i] = "\tsub\tesp, " + IntToString(final_temp_alloc);
+      code[i] = "\tsub\tesp," + IntToString(final_temp_alloc);
     }
+  }
+}
+
+void CodeGen::optimize_code() {
+  for (int i = 0; i < code.size(); i++) {
+
   }
 }
