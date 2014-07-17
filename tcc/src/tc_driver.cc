@@ -67,9 +67,14 @@ void TC::TC_Driver::error(const std::string &err_m) {
 void TC::TC_Driver::print(bool flag) {
   // 構文木を出力しない設定 
   if (flag == false) {
-    std::cout.setstate(std::ios_base::badbit);
+    std::filebuf fb;
+    fb.open ("test.txt",std::ios::out);
+    std::ostream os(&fb);
+    os.setstate(std::ios_base::badbit);
+    nodel->PrintTree(os);
+  } else {
+    nodel->PrintTree(std::cout);
   }
-  nodel->PrintTree(std::cout);
 }
 
 
@@ -132,10 +137,9 @@ void TC::TC_Driver::func_args_check() {
 }
 
 
-void TC::TC_Driver::code_gen(const char *filename, bool flag) {
+void TC::TC_Driver::code_gen(bool flag) {
   if (!flag) {
-    out = new ofstream(filename);
-    cg = new CodeGen(t_driver, out);
+    cg = new CodeGen(t_driver, &cout);
   } else {
     cg = new CodeGen(t_driver, &cout);
   }

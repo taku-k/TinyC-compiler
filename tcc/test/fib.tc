@@ -9,5 +9,4 @@ int fib(int n)
 int main()
 {
     chk(fib(20), 6765);
-    print(fib(20));
 }

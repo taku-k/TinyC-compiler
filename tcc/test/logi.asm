@@ -172,50 +172,6 @@ Lret_logi3:
 	mov	esp,ebp
 	pop	ebp
 	ret	
-	GLOBAL	logi4
-logi4:
-	push	ebp
-	mov	ebp,esp
-	sub	esp,12
-	mov	dword [ebp-4],1
-	mov	eax,0
-	mov	[ebp-8],eax
-	mov	eax,[ebp+8]
-	cmp	eax,[ebp-8]
-	sete	al
-	movzx	eax,al
-	cmp	eax,0
-	je	L16
-	mov	eax,[ebp+12]
-	mov	[ebp-8],eax
-	mov	eax,[ebp+8]
-	imul	eax,[ebp-8]
-	mov	[ebp-8],eax
-	mov	eax,[ebp+12]
-	mov	[ebp-12],eax
-	mov	eax,[ebp+8]
-	add	eax,[ebp-12]
-	cmp	eax,[ebp-8]
-	setl	al
-	movzx	eax,al
-	cmp	eax,0
-	je	L16
-	mov	dword [ebp-4],0
-L16:
-	mov	eax,[ebp-4]
-	cmp	eax,0
-	je	L14
-	mov	eax,1
-	jmp	Lret_logi4
-	jmp	L15
-L14:
-	mov	eax,0
-	jmp	Lret_logi4
-L15:
-Lret_logi4:
-	mov	esp,ebp
-	pop	ebp
-	ret	
 	GLOBAL	main
 main:
 	push	ebp
@@ -261,18 +217,6 @@ main:
 	mov	eax,2
 	push	eax
 	call	logi3
-	add	esp,8
-	push	eax
-	call	chk
-	add	esp,8
-	EXTERN	chk
-	mov	eax,1
-	push	eax
-	mov	eax,3
-	push	eax
-	mov	eax,2
-	push	eax
-	call	logi4
 	add	esp,8
 	push	eax
 	call	chk

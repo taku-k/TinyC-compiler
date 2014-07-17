@@ -1,6 +1,6 @@
 #!/bin/csh
 foreach f (*.tc)
-	(../src/tcc -i $f -o $f:r.asm) >& $f:r.err
+	(../src/tcc $f > $f:r.asm) >& $f:r.err
 	if (-z $f:r.asm) then
 		rm $f:r.asm
 	endif

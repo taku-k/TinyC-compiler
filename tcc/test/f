@@ -1,39 +1,34 @@
-	GLOBAL	fib
-fib:
+	GLOBAL	w
+w:
 	push	ebp
 	mov	ebp,esp
 	sub	esp,8
-	mov	eax,2
+	mov	eax,0
 	mov	[ebp-4],eax
+L0:
+	mov	eax,0
+	mov	[ebp-8],eax
 	mov	eax,[ebp+8]
-	cmp	eax,[ebp-4]
-	setl	al
+	cmp	eax,[ebp-8]
+	setg	al
 	movzx	eax,al
 	cmp	eax,0
-	je	L0
-	mov	eax,[ebp+8]
-	jmp	Lret_fib
-	jmp	L1
-L0:
-	mov	eax,2
-	mov	[ebp-4],eax
-	mov	eax,[ebp+8]
-	sub	eax,[ebp-4]
-	push	eax
-	call	fib
-	add	esp,4
+	je	L1
+	mov	eax,1
+	mov	[ebp-8],eax
+	mov	eax,[ebp-4]
+	add	eax,[ebp-8]
 	mov	[ebp-4],eax
 	mov	eax,1
 	mov	[ebp-8],eax
 	mov	eax,[ebp+8]
 	sub	eax,[ebp-8]
-	push	eax
-	call	fib
-	add	esp,4
-	add	eax,[ebp-4]
-	jmp	Lret_fib
+	mov	[ebp+8],eax
+	jmp	L0
 L1:
-Lret_fib:
+	mov	eax,[ebp-4]
+	jmp	Lret_w
+Lret_w:
 	mov	esp,ebp
 	pop	ebp
 	ret	
@@ -43,11 +38,11 @@ main:
 	mov	ebp,esp
 	sub	esp,0
 	EXTERN	chk
-	mov	eax,6765
+	mov	eax,10
 	push	eax
-	mov	eax,20
+	mov	eax,10
 	push	eax
-	call	fib
+	call	w
 	add	esp,4
 	push	eax
 	call	chk

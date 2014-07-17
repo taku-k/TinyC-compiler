@@ -2,10 +2,26 @@
 
 chk(int x, int y)
 {
-    printf(x == y ? "OK\n" : "NG\n");
+  if (x == y) {
+    printf("OK\n");
+  }
+  else {
+    printf("NG\n");
+    printf("Return:   %d\n", x);
+    printf("Expected: %d\n", y);
+  }
 }
 
-print(int x)
+/* for ss.c */
+
+int vv[10] = {3, 5, 1, 8, 7, 6, 2, 10, 4, 9};
+
+int v(int i)
 {
-	printf("%d\n", x);
+  return vv[i];
+}
+
+set_v(i, x)
+{
+  vv[i] = x;
 }

@@ -25,20 +25,9 @@ int logi3(int x, int y)
         return 0;
 }
 
-int logi4(int x, int y)
-{
-    if (x == 0 || x+y < x*y) {
-        return 1;
-    } else {
-        return 0;
-    }
-}
-
-
 int main()
 {
     chk(logi1(1, 2, 4, 3), 1);
     chk(logi2(1, 2, 3, 0), 1);
     chk(logi3(2, 3), 1);
-    chk(logi4(2, 3), 1);
 }
