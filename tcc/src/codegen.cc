@@ -73,7 +73,7 @@ void CodeGen::external_decl_gen(DeclTypeNode *dtn) {
   for (int i = 0; i < dl->get_elems_size(); i++) {
     IdentifierNode *id = (IdentifierNode *)(dl->get_elems_node(i));
     // emit_code("\tCOMMON\t" + id->getname() + "\t" + IntToString(4));
-    emit_code(new Code("COMMON", id->getname(), IntToString(4)));
+    emit_code(new Code("COMMON", id->getname() + "\t" + IntToString(4)));
   }
 }
 
@@ -295,25 +295,39 @@ void CodeGen::general_logical_gen(string logical, Node *n) {
 
 
   // emit_code("\tmov\tdword [ebp-" + IntToString(tmp=create_temp_alloc()) + "],0");
-  emit_code(new Code("mov", "dword [ebp-" + IntToString(tmp=create_temp_alloc()) + "]", logical == "OR" ? "0" : "1"));
+  emit_code(new Code("mov", "dword [ebp-" + IntToString(tmp=create_temp_alloc()) + "]", logical == "OR" ? "1" : "0"));
   expr_gen(n->getnode(0));
   // emit_code("\tcmp\teax,0");
   emit_code(new Code("cmp", "eax", "0"));
   // emit_code("\tje\t" + label);
-  emit_code(new Code(logical == "OR" ? "je" : "jne", label, ""));
+  emit_code(new Code("je", label, ""));
   expr_gen(n->getnode(1));
   // emit_code("\tcmp\teax,0");
   emit_code(new Code("cmp", "eax", "0"));
   // emit_code("\tje\t" + label);
-  emit_code(new Code(logical == "OR" ? "je" : "jne", label, ""));
+  emit_code(new Code("je", label, ""));
   // emit_code("\tmov\tdword [ebp-" + IntToString(tmp) + "],1");
-  emit_code(new Code("mov", "dword [ebp-" + IntToString(tmp) + "]", logical == "OR" ? "1" : "0"));
+  emit_code(new Code("mov", "dword [ebp-" + IntToString(tmp) + "]", logical == "OR" ? "0" : "1"));
   // emit_code(label + ":");
   emit_code(new Code(label, "", "", true));
   // emit_code("\tmov\teax,[ebp-" + IntToString(tmp) + "]");
   emit_code(new Code("mov", "eax", "[ebp-" + IntToString(tmp) + "]"));
 }
 
+// void CodeGen::general_logical_and_gen(Node *n) {
+//   string label = make_label();
+//   emit_code(new Code("mov", "dword [ebp-" + IntToString(tmp=create_temp_alloc()) + "]", "0"));
+//   expr_gen(n->getnode(0));
+//   emit_code(new Code("cmp", "eax", "0"));
+//   emit_code(new Code("setne", "al", ""));
+//   emit_code(new Code("movzx", "eax", "al"));
+//   emit_code(new Code())
+//   expr_gen(n->getnode(1));
+//   emit_code(new Code("cmp", "eax", "0"));
+//   emit_code(new Code("setne", "al", ""));
+//   emit_code(new Code("movzx", "eax", "al"))
+
+// }
 
 void CodeGen::expr_gen(Node *n) {
   string c, label, t0, t1, t2;
@@ -446,7 +460,7 @@ void CodeGen::expr_gen(Node *n) {
       // emit_code("\tsetl\tal");
       // emit_code("\tmovzx\teax,al");
       // release_temp();
-      general_cmp_gen("setle", n);
+      general_cmp_gen("setl", n);
       break;
 
 
@@ -574,7 +588,7 @@ string CodeGen::make_label() {
 
 void CodeGen::release_code() {
   // 出力する前に最適化を行う
-  optimize_code();
+  //optimize_code();
 
   // コードをostreamに出力する
   for (int i = 0; i < codes.size(); i++) {

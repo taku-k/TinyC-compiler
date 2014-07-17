@@ -1,8 +1,8 @@
-CXX  ?= gcc
+CXX = gcc
 
 EXE = tcc
 
-CXXDEBUG = -g -Wall
+CXXDEBUG = -g
 
 CXXSTD = -lstdc++
 
@@ -31,7 +31,7 @@ tcc: $(FILES)
 	$(CXX) $(CXXFLAGS) -o $(EXE) $(OBJS) parser.o scanner.o $(LIBS) $(CXXSTD)
 
 parser: tc_parser.yy
-	/usr/local/opt/bison/bin/bison -d -v tc_parser.yy
+	bison -d -v tc_parser.yy
 	$(CXX) $(CXXFLAGS) -c -o parser.o tc_parser.tab.cc
 
 scanner: scanner.l

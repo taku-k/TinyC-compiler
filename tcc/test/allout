@@ -1,0 +1,5 @@
+#!/bin/csh
+foreach f (*.out)
+	echo $f
+	cat $f
+end
