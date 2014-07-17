@@ -38,7 +38,7 @@ public:
   // flagがtrueなら構文木を出力する
   void print(bool flag);
   // コードを生成する
-  void code_gen(bool flag);
+  void code_gen(bool flag, bool optimize_flag);
 
   TC::Token_Driver *getTokenDriver() { 
     return t_driver;

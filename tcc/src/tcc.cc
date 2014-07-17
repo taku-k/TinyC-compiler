@@ -46,7 +46,7 @@ int main(const int argc, char *argv[])
     driver.print(debug_check);
 
     // コードの生成関数を呼び出す
-    driver.code_gen(debug_check);
+    driver.code_gen(debug_check, optimize_check);
   }
 
   if (debug_check == true) {

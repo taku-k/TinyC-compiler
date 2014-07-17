@@ -92,7 +92,7 @@ public:
 
   // コードを出力ストリームに流す
   // この時同時にコードの最適化関数を呼び出す
-  void release_code();
+  void release_code(bool flag);
 
 
 private:

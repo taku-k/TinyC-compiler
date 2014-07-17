@@ -1,5 +1,7 @@
 #!/bin/csh
 foreach f (*.out)
-	echo $f
+	echo "-----"$f"-----"
 	cat $f
+    wc -l $f:r.asm
+    echo "--------------"
 end

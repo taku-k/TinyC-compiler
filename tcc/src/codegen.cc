@@ -639,9 +639,11 @@ string CodeGen::make_label() {
   return ret;
 }
 
-void CodeGen::release_code() {
+void CodeGen::release_code(bool flag) {
   // 出力する前に最適化を行う
-  //optimize_code();
+  if (flag) {
+    optimize_code();
+  }
 
   // コードをostreamに出力する
   for (int i = 0; i < codes.size(); i++) {
@@ -679,12 +681,13 @@ void CodeGen::optimize_code() {
     if (c1 != NULL && c2 != NULL) {
       // いらないジャンプの削除
       if (c1->get_tag(0) == "jmp" && c1->get_tag(1) == c2->get_tag(0) && c2->is_label()) {
-        codes[i+1] = NULL;
+        codes[i] = NULL;
       }
 
-      if (c1->get_tag(0) == "mov" && c1->get_tag(1) == "eax" && c2->get_tag(2) == "eax") {
+      if (c1->get_tag(0) == "mov" && c1->get_tag(1) == "eax" && c2->get_tag(2) == "eax" && (c1->get_tag(2))[0] != '[') {
         c2->set_tag(2, c1->get_tag(2));
-        c1 = NULL;
+        c2->set_tag(1, "dword " + c2->get_tag(1));
+        codes[i] = NULL;
       }
     }
   }

@@ -137,7 +137,7 @@ void TC::TC_Driver::func_args_check() {
 }
 
 
-void TC::TC_Driver::code_gen(bool flag) {
+void TC::TC_Driver::code_gen(bool flag, bool optimize_flag) {
   if (!flag) {
     cg = new CodeGen(t_driver, &cout);
   } else {
@@ -145,5 +145,5 @@ void TC::TC_Driver::code_gen(bool flag) {
   }
 
   cg->code_generate(nodel);
-  cg->release_code();
+  cg->release_code(optimize_flag);
 }
