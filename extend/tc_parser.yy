@@ -51,6 +51,8 @@
 %token  <op>  T_NotEqual
 %token  <op>  T_LessEqual
 %token  <op>  T_GreaterEqual
+%token  <op>  T_AddAssign
+%token  <op>  T_SubAssign
 
 
 %type <node> external_declaration
@@ -182,6 +184,8 @@ expression                  : assign_expr                                 { $$ =
 
 assign_expr                 : logical_OR_expr                             { $$ = new AssignExprNode($1); }
                             | Identifier '=' assign_expr                  { $$ = new AssignExprNode(ref_var($1), $3); }
+                            | Identifier T_AddAssign assign_expr           {}
+                            | Identifier T_SubAssign assign_expr           {}
                             ;
 
 logical_OR_expr             : logical_AND_expr                            { $$ = $1; }

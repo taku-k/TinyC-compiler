@@ -9,3 +9,8 @@ int test_code() {
 	}
 	return check;
 }
+
+int main()
+{
+    chk(test_code(), 15);
+}

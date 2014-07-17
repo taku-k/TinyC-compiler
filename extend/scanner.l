@@ -65,6 +65,16 @@ symbol			";"|","|"("|")"|"{"|"}"|">"|"<"|"*"|"="|"+"|"/"|"-"|"&"|"|"|"^"
             return token::T_Or;
           }
 
+"+="      {
+            yylval->op = OP::ADDASSIGN;
+            return token::T_AddAssign;
+          }
+
+"-="      {
+            yylval->op = OP::SUBASSIGN;
+            return token::T_SubAssign;
+          }
+
 {number}	{
             yylval->val = strtol(yytext, NULL, 10);
             return token::Integer;

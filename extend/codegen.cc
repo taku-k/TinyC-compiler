@@ -21,7 +21,23 @@ Code::Code(string tag0, string tag1, string tag2, bool flag) {
   label_flag = flag;
 }
 
-string Code::form_code() {}
+string Code::form_code() {
+  string ret;
+  if (label_flag) {
+    // もしラベルなら次のように出力する
+    // (e.g.) label:
+    ret = tag[0] + ":";
+  } else {
+    //ラベルでないなら次のように出力する
+    // (e.g.) \tadd\tesp,eax
+    if (tag[2] != "") {
+      ret = "\t" + tag[0] + "\t" + tag[1] + "," + tag[2];
+    } else {
+      ret = "\t" + tag[0] + "\t" + tag[1];
+    }
+  }
+  return ret;
+}
 
 string Code::get_tag(int num) {
   return tag[num];
@@ -557,29 +573,14 @@ string CodeGen::make_label() {
 }
 
 void CodeGen::release_code() {
-  Code *c;
-
   // 出力する前に最適化を行う
   optimize_code();
 
   // コードをostreamに出力する
   for (int i = 0; i < codes.size(); i++) {
     // (*out) << codes[i] << endl;
-
-    c = codes[i];
-    if (c->is_label()) {
-      // もしラベルなら次のように出力する
-      // (e.g.) label:
-      (*out) << c->get_tag(0) << ":" << endl;;
-    } else {
-      //ラベルでないなら次のように出力する
-      // (e.g.) \tadd\tesp,eax
-      if (c->get_tag(2) != "") {
-        (*out) << "\t" << c->get_tag(0) << "\t" << c->get_tag(1) << "," << c->get_tag(2) << endl;
-      } else {
-        (*out) << "\t" << c->get_tag(0) << "\t" << c->get_tag(1) << endl;
-      }
-      
+    if (codes[i] != NULL) {
+      (*out) << codes[i]->form_code() << endl;
     }
   }
 }
@@ -604,7 +605,16 @@ void CodeGen::insert_temp_alloc_code() {
 }
 
 void CodeGen::optimize_code() {
-  for (int i = 0; i < codes.size(); i++) {
-
+  Code *c1, *c2;
+  for (int i = 0; i < codes.size() - 1; i++) {
+    c1 = codes[i];
+    c2 = codes[i+1];
+    if (c1 != NULL && c2 != NULL) {
+      // いらないジャンプの削除
+      if (c1->get_tag(0) == "jmp" && c1->get_tag(1) == c2->get_tag(0) && c2->is_label()) {
+        codes[i] = NULL;
+        codes[i+1] = NULL;
+      }
+    }
   }
 }
