@@ -1,0 +1,14 @@
+#!/bin/csh
+foreach f (*.tc)
+    echo $f:r
+    rm -f $f:r.asm
+    rm -f $f:r-o.asm
+    rm -f $f:r.err
+    rm -f $f:r-o.err
+    rm -f $f:r.o
+    rm -f $f:r-o.o
+    rm -f $f:r
+    rm -f $f:r-o
+    rm -f $f:r.out
+    rm -f $f:r-o.out
+end

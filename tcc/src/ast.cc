@@ -525,6 +525,29 @@ void RETURNStatNode::PrintNode(std::ostream &os) {
  */
 
 
+ /*
+  * FORStatNode
+  */
+FORStatNode::FORStatNode(Node* ex1, Node* ex2, Node* ex3, Node* stat) {
+  node_[0] = ex1;
+  node_[1] = ex2;
+  node_[2] = ex3;
+  node_[3] = stat;
+  type_ = OP::FORSTATNODE;
+}
+
+void FORStatNode::PrintNode(std::ostream &os) {
+  os << "(FOR (";
+  PrintNum(0, os);
+  os << ";";
+  PrintNum(1, os);
+  os << ";";
+  PrintNum(2, os);
+  os << ")\n";
+  PrintNum(3, os);
+  os << ")\n";
+}
+
 /*
  * AssignExprNode 
  */
@@ -532,15 +555,26 @@ AssignExprNode::AssignExprNode(Node *node) {
   node_[1] = node;
 }
 
-AssignExprNode::AssignExprNode(Node *id, Node* node) {
+AssignExprNode::AssignExprNode(int op, Node *id, Node* node) {
   node_[0] = id;
   node_[1] = node;
+  type_ = op;
 }
 
 
 void AssignExprNode::PrintNode(std::ostream &os) {
   if (node_[0] != NULL) {
-    os << "(= ";
+    switch (type_) {
+      case OP::ASSIGN:
+        os << "(= ";
+        break;
+      case OP::ADDASSIGN:
+        os << "(+= ";
+        break;
+      case OP::SUBASSIGN:
+        os << "(-= ";
+        break;
+    }
     node_[0]->PrintNode(os);
     os << " ";
     PrintNum(1, os);
@@ -614,14 +648,20 @@ void ExprNode::PrintNode(std::ostream &os) {
  * UnaryNode
  */
 UnaryNode::UnaryNode(const int op, Node *node) : Node() {
-  op_ = OP::UNARY;
+  op_ = op;
   node_[0] = node;
 }
 
 void UnaryNode::PrintNode(std::ostream &os) {
   switch(op_) {
-    case(OP::MINUS):
+    case OP::MINUS:
       os << "(- ";
+      break;
+    case OP::PREINC:
+      os << "(++ ";
+      break;
+    case OP::PREDEC:
+      os << "(-- ";
       break;
   }
   PrintNum(0, os);

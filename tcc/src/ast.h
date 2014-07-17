@@ -29,7 +29,7 @@ namespace OP{
   enum {
     FUNC, FUNCNODE, STATNODE, COMSTATNODE, IFSTATNODE, IFELSESTATNODE,WHILESTATNODE, RETNODE,INT, ID, OR, AND, EQUAL, NOTEQUAL, LESSEQUAL,
      GREATEREQUAL, LESS, GREATER, ADD, SUB, MUL, DIV, MINUS, INTEGERNODE, DECLTYPENODE, RETSTATNODE, INTEGER, FUNCCALL, EXPRESSION,
-     UNARY, BITOR, BITXOR, BITAND, ADDASSIGN, SUBASSIGN,
+     UNARY, BITOR, BITXOR, BITAND, ADDASSIGN, SUBASSIGN, FORSTATNODE, ASSIGN, POSTINC, POSTDEC, PREINC, PREDEC, 
   };
 }
 
@@ -326,14 +326,23 @@ public:
 private:
 };
 
+class FORStatNode : public Node {
+public:
+  FORStatNode(Node* ex1, Node* ex2, Node* ex3, Node* stat);
+  void PrintNode(std::ostream &os);
+private:
+};
+
 
 class AssignExprNode : public Node {
 public:
   AssignExprNode(Node *node);
-  AssignExprNode(Node *id, Node* node);
+  AssignExprNode(int op, Node *id, Node* node);
   void PrintNode(std::ostream &os);
 private:
 };
+
+
 
 // このクラスはlogical, equalty, relational, alithimeticを管理する
 class ExprNode : public Node {

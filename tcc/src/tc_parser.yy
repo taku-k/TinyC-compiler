@@ -43,6 +43,9 @@
 %token  T_Else
 %token  T_While
 %token  T_Return
+%token  T_For
+%token  T_Inc
+%token  T_Dec
 %token  <id>  Id
 %token  <val> Integer
 %token  <op>  T_Equal
@@ -153,6 +156,7 @@ statement                   : ';'                                               
                             | T_If '(' expression ')' statement T_Else statement    { $$ = new IFStatNode($3, $5, $7); }
                             | T_While '(' expression ')' statement                  { $$ = new WHILEStatNode($3, $5); }
                             | T_Return expression ';'                               { $$ = new RETURNStatNode($2); }
+                            | T_For '(' expression ';' expression ';' expression ')' statement { $$ = new FORStatNode($3, $5, $7, $9); }
                             ;
 
 compound_statement          : subroutien_up '{' declaration_list '}' subroutien_down                 { $$ = new ComStatNode($3, new StatList()); }
@@ -183,9 +187,9 @@ expression                  : assign_expr                                 { $$ =
                             ;
 
 assign_expr                 : logical_OR_expr                             { $$ = new AssignExprNode($1); }
-                            | Identifier '=' assign_expr                  { $$ = new AssignExprNode(ref_var($1), $3); }
-                            | Identifier T_AddAssign assign_expr           {}
-                            | Identifier T_SubAssign assign_expr           {}
+                            | Identifier '=' assign_expr                  { $$ = new AssignExprNode(OP::ASSIGN, ref_var($1), $3); }
+                            | Identifier T_AddAssign assign_expr          { $$ = new AssignExprNode(OP::ADDASSIGN, ref_var($1), $3); }
+                            | Identifier T_SubAssign assign_expr          { $$ = new AssignExprNode(OP::SUBASSIGN, ref_var($1), $3); }
                             ;
 
 logical_OR_expr             : logical_AND_expr                            { $$ = $1; }

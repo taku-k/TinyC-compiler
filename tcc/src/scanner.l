@@ -34,6 +34,8 @@ symbol			";"|","|"("|")"|"{"|"}"|">"|"<"|"*"|"="|"+"|"/"|"-"|"&"|"|"|"^"
 
 "return"	{ return token::T_Return; }
 
+"for"     { return token::T_For; }
+
 ">="			{ 
             yylval->op = OP::GREATEREQUAL;
             return token::T_GreaterEqual; 
@@ -74,6 +76,10 @@ symbol			";"|","|"("|")"|"{"|"}"|">"|"<"|"*"|"="|"+"|"/"|"-"|"&"|"|"|"^"
             yylval->op = OP::SUBASSIGN;
             return token::T_SubAssign;
           }
+
+"++"      { return token::T_Inc; }
+
+"--"      { return token::T_Dec; }
 
 {number}	{
             yylval->val = strtol(yytext, NULL, 10);

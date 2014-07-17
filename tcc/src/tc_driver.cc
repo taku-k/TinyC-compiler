@@ -5,6 +5,8 @@
 
 #include "tc_driver.h"
 
+
+
 TC::TC_Driver::~TC_Driver(){
   delete(scanner);
   scanner = NULL;
@@ -67,11 +69,9 @@ void TC::TC_Driver::error(const std::string &err_m) {
 void TC::TC_Driver::print(bool flag) {
   // 構文木を出力しない設定 
   if (flag == false) {
-    std::filebuf fb;
-    fb.open ("test.txt",std::ios::out);
-    std::ostream os(&fb);
-    os.setstate(std::ios_base::badbit);
-    nodel->PrintTree(os);
+    null_buffer = new NullBuffer();
+    null_stream = new ostream(null_buffer);
+    nodel->PrintTree(*null_stream);
   } else {
     nodel->PrintTree(std::cout);
   }

@@ -43,6 +43,11 @@ string Code::get_tag(int num) {
   return tag[num];
 }
 
+void Code::set_tag(int num, string t)
+{
+  tag[num] = t;
+}
+
 bool Code::is_label() {
   return label_flag;
 }
@@ -124,25 +129,28 @@ void CodeGen::state_list_gen(StatList *sl) {
 
 void CodeGen::state_gen(Node *n) {
   switch(n->get_type()) {
-      case(OP::STATNODE):
+      case OP::STATNODE:
         if (n->getnode(0) != NULL) {
           expr_list_gen((ExpressionList *)(n->getnode(0)));
         }
         break;
-      case(OP::COMSTATNODE):
+      case OP::COMSTATNODE:
         state_list_gen((StatList *)(((ComStatNode *)n)->get_list(1)));
         break;
-      case(OP::IFSTATNODE):
+      case OP::IFSTATNODE:
         if_state_gen((IFStatNode *)n, false);
         break;
-      case(OP::IFELSESTATNODE):
+      case OP::IFELSESTATNODE:
         if_state_gen((IFStatNode *)n, true);
         break;
-      case(OP::WHILESTATNODE):
+      case OP::WHILESTATNODE:
         while_state_gen((WHILEStatNode *)n);
         break;
-      case(OP::RETSTATNODE):
+      case OP::RETSTATNODE:
         ret_state_gen((RETURNStatNode *)n);
+        break;
+      case OP::FORSTATNODE:
+        for_state_gen((FORStatNode *)n);
         break;
     }
 }
@@ -220,6 +228,30 @@ void CodeGen::ret_state_gen(RETURNStatNode *rsn) {
 }
 
 
+void CodeGen::for_state_gen(FORStatNode *fsn)
+{
+  string iter = make_label();
+  string break_label = make_label();
+
+  // create init --- for ("this"; * ; *) stat
+  expr_list_gen((ExpressionList *)(fsn->getnode(0)));
+  // iterate
+  emit_code(new Code(iter, "", "", true));
+  // create cmp --- for (*; "this"; *) stat
+  expr_list_gen((ExpressionList *)(fsn->getnode(1)));
+  emit_code(new Code("cmp", "eax", "0"));
+  emit_code(new Code("je", break_label, ""));
+  // create statement --- for (*;*;*) "this"
+  state_gen(fsn->getnode(3));
+  // create last --- for (*;*;"this") stat
+  expr_list_gen((ExpressionList *)(fsn->getnode(2)));
+  // turn back
+  emit_code(new Code("jmp", iter, ""));
+
+  // break
+  emit_code(new Code(break_label, "", "", true));
+}
+
 
 void CodeGen::expr_list_gen(ExpressionList *epl) {
   assign_expr_gen((AssignExprNode *)(epl->getnode(0)));
@@ -231,9 +263,21 @@ void CodeGen::expr_list_gen(ExpressionList *epl) {
 
 
 void CodeGen::assign_expr_gen(AssignExprNode *aen) {
-  string c,t0,t1,t2;
+  string c, t0, t1, t2;
   // 左辺に変数をもつ場合
   if (aen->getnode(0) != NULL) {
+    // assign expr
+    switch(aen->get_type()) {
+      case OP::ASSIGN:
+        t0 = "mov";
+        break;
+      case OP::ADDASSIGN:
+        t0 = "add";
+        break;
+      case OP::SUBASSIGN:
+        t0 = "sub";
+        break;
+    }
     // 右辺の実行
     assign_expr_gen((AssignExprNode *)(aen->getnode(1)));
     // 指定の番地に値を戻す
@@ -242,9 +286,8 @@ void CodeGen::assign_expr_gen(AssignExprNode *aen) {
     // 大域変数の場合
     if (n->get_token_info()->get_lev() == 0) {
       // emit_code("\tmov\t[" + n->getname() + "],eax");
-      emit_code(new Code("mov", "[" + n->getname() + "]", "eax"));
+      emit_code(new Code(t0, "[" + n->getname() + "]", "eax"));
     } else {
-      t0 = "mov";
       t1 = "[ebp";
       // c = "\tmov\t[ebp";
       if (n->get_offset_from_node() > 0) {
@@ -536,10 +579,20 @@ void CodeGen::expr_gen(Node *n) {
       func_call_gen((FuncCallNode *)n);
       break;
 
-    case OP::UNARY:
+    case OP::MINUS:
       expr_gen(n->getnode(0));
       // emit_code("\timul\teax, -1");
       emit_code(new Code("imul", "eax", "-1"));
+      break;
+
+    case OP::PREINC:
+      expr_gen(n->getnode(0));
+      emit_code(new Code("add", "eax", "1"));
+      break;
+
+    case OP::PREDEC:
+      expr_gen(n->getnode(0));
+      emit_code(new Code("sub", "eax", "1"));
       break;
 
     case OP::EXPRESSION:
@@ -626,8 +679,12 @@ void CodeGen::optimize_code() {
     if (c1 != NULL && c2 != NULL) {
       // いらないジャンプの削除
       if (c1->get_tag(0) == "jmp" && c1->get_tag(1) == c2->get_tag(0) && c2->is_label()) {
-        codes[i] = NULL;
         codes[i+1] = NULL;
+      }
+
+      if (c1->get_tag(0) == "mov" && c1->get_tag(1) == "eax" && c2->get_tag(2) == "eax") {
+        c2->set_tag(2, c1->get_tag(2));
+        c1 = NULL;
       }
     }
   }

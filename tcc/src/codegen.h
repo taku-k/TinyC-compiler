@@ -18,6 +18,7 @@ class ExpressionList;
 class AssignExprNode;
 class FuncCallNode;
 class DeclTypeNode;
+class FORStatNode;
 
 
 // 一行のコード情報を管理するクラス
@@ -27,6 +28,7 @@ public:
   ~Code() {};
   string form_code();
   string get_tag(int num);
+  void set_tag(int num, string t);
   bool is_label();
 private:
   bool label_flag;
@@ -69,6 +71,9 @@ public:
 
   // return文
   void ret_state_gen(RETURNStatNode *rsn);
+
+  // for
+  void for_state_gen(FORStatNode *fsn);
 
   // exprのコード生成
   void expr_list_gen(ExpressionList *epl);

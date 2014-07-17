@@ -12,6 +12,12 @@
 
 class CodeGen;
 
+class NullBuffer : public std::streambuf
+{
+public:
+  int overflow(int c) { return c; }
+};
+
 namespace TC{
 
 // class Token_Driver;
@@ -21,7 +27,7 @@ class TC_Driver {
 public:
 
 	TC_Driver() : parser(NULL),scanner(NULL),nodel(NULL),
-            t_driver(NULL), semnerrs(0) {};
+            t_driver(NULL), semnerrs(0), null_buffer(NULL), null_stream(NULL) {};
 	~TC_Driver();
 
   // パース関数
@@ -65,6 +71,9 @@ private:
 
   std::ofstream *out;
   int semnerrs;
+
+  NullBuffer *null_buffer;
+  std::ostream *null_stream;
 };
 
 
