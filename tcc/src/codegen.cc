@@ -221,8 +221,9 @@ void CodeGen::while_state_gen(WHILEStatNode *wsn) {
 
 void CodeGen::ret_state_gen(RETURNStatNode *rsn) {
   // 式の計算コード生成
-  expr_list_gen((ExpressionList *)(rsn->getnode(0)));
-
+  if (rsn->getnode(0) != NULL) {
+    expr_list_gen((ExpressionList *)(rsn->getnode(0)));
+  }
   // emit_code("\tjmp\t" + ret_label);
   emit_code(new Code("jmp", ret_label, ""));
 }

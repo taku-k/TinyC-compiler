@@ -156,6 +156,7 @@ statement                   : ';'                                               
                             | T_If '(' expression ')' statement T_Else statement    { $$ = new IFStatNode($3, $5, $7); }
                             | T_While '(' expression ')' statement                  { $$ = new WHILEStatNode($3, $5); }
                             | T_Return expression ';'                               { $$ = new RETURNStatNode($2); }
+                            | T_Return ';'                                          { $$ = new RETURNStatNode(NULL); }
                             | T_For '(' expression ';' expression ';' expression ')' statement { $$ = new FORStatNode($3, $5, $7, $9); }
                             ;
 
