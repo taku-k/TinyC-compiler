@@ -1,4 +1,4 @@
-CXX = gcc
+CXX ?= gcc
 
 EXE = tcc
 
@@ -32,7 +32,7 @@ tcc: $(FILES)
 
 
 parser: tc_parser.yy
-	/home/012/a0124973/3sw/bin/bison -d -v tc_parser.yy
+	bison -d -v tc_parser.yy
 	$(CXX) $(CXXFLAGS) -c -o parser.o tc_parser.tab.cc $(CXXSTD)
 
 scanner: scanner.l
