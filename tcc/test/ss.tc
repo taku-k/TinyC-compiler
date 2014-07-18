@@ -29,7 +29,7 @@ int myqsort(int left, int right)
 {
     int i, last;
 
-    if (left >= right) return ;
+    if (left >= right) return;
     swap(left, (left + right)/2);
     last = left;
     i = left + 1;

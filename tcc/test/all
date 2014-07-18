@@ -1,6 +1,6 @@
 #!/bin/csh
 foreach f (*.tc)
-	(../src/tcc $f > $f:r.asm) >& $f:r.err
+	(../src/tcc < $f > $f:r.asm) >& $f:r.err
 	if (-z $f:r.asm) then
 		rm $f:r.asm
 	endif
@@ -13,20 +13,4 @@ foreach f (*.tc)
 			./$f:r > $f:r.out
 		endif
 	endif
-end
-
-foreach f (*.tc)
-    (../src/tcc -O $f > $f:r-o.asm) >& $f:r-o.err
-    if (-z $f:r-o.asm) then
-        rm $f:r-o.asm
-    endif
-    if (-z $f:r-o.err) then
-        rm $f:r-o.err
-    endif
-    if (-e $f:r-o.asm) then
-        ./tcln $f:r-o
-        if (-e $f:r) then
-            ./$f:r-o > $f:r-o.out
-        endif
-    endif
 end

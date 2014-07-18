@@ -1,7 +1,13 @@
 #!/bin/csh
-foreach f (*.out)
-	echo "-----"$f"-----"
-	cat $f
-    wc -l $f:r.asm
+foreach f (*-o.out)
+	set filename=`echo $f | cut -d "-" -f 1`
+	echo "-----"${filename}".tc-----"
+	echo "#before"
+	cat ${filename}.out
+	echo "#after"
+	cat ${filename}-o.out
+    wc -l ${filename}.asm
+    echo "↓"
+    wc -l ${filename}-o.asm
     echo "--------------"
 end
